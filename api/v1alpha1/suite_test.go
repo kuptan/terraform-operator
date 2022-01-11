@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -59,6 +60,10 @@ var _ = BeforeSuite(func() {
 		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases")},
 		ErrorIfCRDPathMissing: true,
 	}
+
+	os.Setenv("DOCKER_REPOSITRY", "docker.io")
+	os.Setenv("TERRAFORM_RUNNER_IMAGE", "ibraheemalsaady/terraform-runner")
+	os.Setenv("TERRAFORM_RUNNER_IMAGE_TAG", "0.0.3")
 
 	err := SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())

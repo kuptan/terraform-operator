@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -57,6 +58,10 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+
+	os.Setenv("DOCKER_REPOSITRY", "docker.io")
+	os.Setenv("TERRAFORM_RUNNER_IMAGE", "ibraheemalsaady/terraform-runner")
+	os.Setenv("TERRAFORM_RUNNER_IMAGE_TAG", "0.0.3")
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
