@@ -5,10 +5,22 @@ This projects makes defining and running a Terraform module, Kubernetes native t
 
 **Disclaimer**
 
-This project is not a YAML to HCL converted. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works underhood, have a look at the [design doc](#)
+This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works underhood, have a look at the [design doc](#)
 
 ## Installation
 
+**Helm**
+
+```bash
+  helm repo add kubechamp https://kube-champ.github.io/terraform-operator
+  helm install terraform-operator kubechamp/terraform-operator
+```
+
+**Kubernetes Manifest**
+
+```bash
+  
+```
 - install crds
 - install rbac
 - install deployment 
@@ -55,12 +67,6 @@ spec:
         configMap:
           name: "terraform-env-config"
 
-  ## a flag to run a terraform destroy
-  destroy: false
-
-  ## a flag to delete the job after the job is completed
-  deleteCompletedJobs: false
-
   ## all outputs will be written to a secret by default
   ## if provided, it will be available in the Status when you run kubectl describe run/[run-name]
   outputs:
@@ -69,4 +75,13 @@ spec:
       moduleOutputName: result
       ## if set, it will mask the value in the run status
       sensitive: false
+
+  ## a flag to run a terraform destroy
+  destroy: false
+
+  ## a flag to delete the job after the job is completed
+  deleteCompletedJobs: false
+
+  ## number of retries in case of run failure
+  retryLimit: 2
 ```
