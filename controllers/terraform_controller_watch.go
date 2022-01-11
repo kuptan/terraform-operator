@@ -48,10 +48,6 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 		}
 
 		if !run.Spec.Destroy {
-			if err := r.updateOutputStatus(run, namespacedName); err != nil {
-				r.Recorder.Event(run, "Normal", "Warn", "Failed to read run outputs from the generated run secret")
-			}
-
 			r.Recorder.Event(run, "Normal", "Completed", fmt.Sprintf("Run(%s) completed", run.Status.RunId))
 		} else {
 			r.Recorder.Event(run, "Normal", "Destroyed", fmt.Sprintf("Run(%s) completed with terraform destroy", run.Status.RunId))

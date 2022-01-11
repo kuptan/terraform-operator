@@ -121,44 +121,6 @@ var _ = Describe("TerraformRun", func() {
 			Expect(owner).ToNot(BeNil())
 		})
 
-		It("should add output to status", func() {
-			run := fetched.DeepCopy()
-
-			outputSpec := &OutputSpec{
-				Key:              "my_key",
-				ModuleOutputName: "result",
-			}
-
-			outputSpecSensitive := &OutputSpec{
-				Key:              "my_other_key",
-				ModuleOutputName: "result",
-				Sensitive:        true,
-			}
-
-			run.Spec.Outputs = []*OutputSpec{
-				outputSpec,
-				outputSpecSensitive,
-			}
-
-			_, exist := run.OutputLookup("my_key")
-
-			Expect(exist).To(BeTrue())
-
-			run.AppendOutputToStatus(outputSpec, "1234")
-
-			By("add a plain output status")
-			Expect(run.Status.Outputs).To(HaveLen(1))
-			Expect(run.Status.Outputs[0].Key).To(Equal(outputSpec.Key))
-			Expect(run.Status.Outputs[0].Value).To(Equal("1234"))
-
-			run.AppendOutputToStatus(outputSpecSensitive, "1234")
-
-			By("add a plain output status")
-			Expect(run.Status.Outputs).To(HaveLen(2))
-			Expect(run.Status.Outputs[1].Key).To(Equal(outputSpecSensitive.Key))
-			Expect(run.Status.Outputs[1].Value).To(Equal(getMaskedString()))
-		})
-
 		It("should handle previous statuses", func() {
 			run := &Terraform{
 				Status: TerraformStatus{

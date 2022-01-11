@@ -66,9 +66,6 @@ type OutputSpec struct {
 	// Attribute name in module
 	// +optional
 	ModuleOutputName string `json:"moduleOutputName"`
-	// Attribute sensitive in module
-	// +optional
-	Sensitive bool `json:"sensitive,omitempty"`
 }
 
 type TerraformRunStatus string
@@ -80,16 +77,6 @@ const (
 	RunDestroyed TerraformRunStatus = "Destroyed"
 	RunFailed    TerraformRunStatus = "Failed"
 )
-
-// OutputStatus outputs the values of Terraform output
-type OutputStatus struct {
-	// Attribute name in module
-	// +optional
-	Key string `json:"key"`
-	// Value
-	// +optional
-	Value string `json:"value"`
-}
 
 // PreviousRuns stores the previous run information in case the current run object was modified
 type PreviousRunStatus struct {
@@ -150,7 +137,6 @@ type TerraformStatus struct {
 	RunStatus        TerraformRunStatus  `json:"runStatus"`
 	Message          string              `json:"message,omitempty"`
 	TerraformVersion string              `json:"terraformVersion"`
-	Outputs          []OutputStatus      `json:"outputs,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -204,8 +190,6 @@ func (r *Terraform) SetRunId() {
 }
 
 func (t *Terraform) PrepareForUpdate() {
-	t.Status.Outputs = []OutputStatus{}
-
 	if len(t.Status.PreviousRuns) == 0 {
 		t.Status.PreviousRuns = []PreviousRunStatus{}
 	}
@@ -213,31 +197,6 @@ func (t *Terraform) PrepareForUpdate() {
 	t.Status.PreviousRuns = append(t.Status.PreviousRuns, PreviousRunStatus{
 		RunId:  t.Status.RunId,
 		Status: t.Status.RunStatus,
-	})
-}
-
-// checks whether a given output name was provided in the Run spec
-func (t *Terraform) OutputLookup(output string) (*OutputSpec, bool) {
-	for _, o := range t.Spec.Outputs {
-		if o.Key == output {
-			return o, true
-		}
-	}
-
-	return nil, false
-}
-
-// appends an output status to the list
-func (t *Terraform) AppendOutputToStatus(output *OutputSpec, value string) {
-	finalVaue := value
-
-	if output.Sensitive {
-		finalVaue = getMaskedString()
-	}
-
-	t.Status.Outputs = append(t.Status.Outputs, OutputStatus{
-		Key:   output.Key,
-		Value: finalVaue,
 	})
 }
 

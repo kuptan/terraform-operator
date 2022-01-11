@@ -41,23 +41,3 @@ func (r *TerraformReconciler) update(run *v1alpha1.Terraform, namespacedName typ
 
 	return r.create(run, namespacedName)
 }
-
-func (r *TerraformReconciler) updateOutputStatus(run *v1alpha1.Terraform, namespacedName types.NamespacedName) error {
-	secret, err := run.GetSecretById(namespacedName)
-
-	if err != nil {
-		return err
-	}
-
-	if len(run.Spec.Outputs) > 0 {
-		for key, value := range secret.Data {
-			output, exist := run.OutputLookup(key)
-
-			if exist {
-				run.AppendOutputToStatus(output, string(value))
-			}
-		}
-	}
-
-	return nil
-}
