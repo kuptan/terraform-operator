@@ -74,9 +74,6 @@ spec:
                     moduleOutputName:
                       description: Attribute name in module
                       type: string
-                    sensitive:
-                      description: Attribute sensitive in module
-                      type: boolean
                   type: object
                 type: array
               retryLimit:
@@ -1738,18 +1735,6 @@ spec:
                 type: integer
               message:
                 type: string
-              outputs:
-                items:
-                  description: OutputStatus outputs the values of Terraform output
-                  properties:
-                    key:
-                      description: Attribute name in module
-                      type: string
-                    value:
-                      description: Value
-                      type: string
-                  type: object
-                type: array
               previousRuns:
                 items:
                   description: PreviousRuns stores the previous run information in

@@ -5,20 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
+	"github.com/kube-champ/terraform-operator/pkg/utils"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	clientcmd "k8s.io/client-go/tools/clientcmd"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
 
 var ClientSet kubernetes.Interface
 
@@ -36,7 +28,7 @@ func CreateK8SConfig() (*rest.Config, error) {
 	var clientset *kubernetes.Clientset
 	var config *rest.Config
 
-	if fileExists(kubeconfigPath) {
+	if utils.FileExists(kubeconfigPath) {
 		if config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath); err != nil {
 			l.Error(err, "failed to create K8s config from kubeconfig")
 			return nil, err
