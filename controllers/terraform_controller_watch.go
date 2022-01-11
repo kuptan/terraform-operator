@@ -61,7 +61,7 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 
 	// if it got here, then the job is failed -- sadly .... :( :( :(
 	run.Status.RunStatus = v1alpha1.RunFailed
-	r.Recorder.Event(run, "Error", "Failed", fmt.Sprintf("Run(%s) failed", run.Status.RunId))
+	r.Recorder.Event(run, "Warning", "Failed", fmt.Sprintf("Run(%s) failed", run.Status.RunId))
 
 	r.Status().Update(context.Background(), run)
 

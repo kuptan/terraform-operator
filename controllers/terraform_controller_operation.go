@@ -12,7 +12,6 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 	l := log.FromContext(context.Background())
 
 	run.SetRunId()
-	run.Status.TerraformVersion = run.Spec.TerraformVersion
 
 	_, err := run.CreateTerraformRun(namespacedName)
 

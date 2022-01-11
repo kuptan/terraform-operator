@@ -1750,13 +1750,10 @@ spec:
                 type: array
               runStatus:
                 type: string
-              terraformVersion:
-                type: string
             required:
             - currentRunId
             - generation
             - runStatus
-            - terraformVersion
             type: object
         type: object
     served: true

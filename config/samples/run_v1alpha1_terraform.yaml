@@ -6,24 +6,40 @@ spec:
   terraformVersion: 1.0.2
 
   module:
-    source: IbraheemAlSaady/test/module
-    version: 0.0.1
+    source: IbraheemAlSaady/test/module//modules/aws
+    version: 0.0.2
 
   variables:
-    - key: length
-      value: "16"
+    - key: name
+      value: "my bucket"
+    - key: AWS_DEFAULT_REGION
+      value: eu-west-1
+      environmentVariable: true
+      value: "my bucket"
+    - key: AWS_ACCESS_KEY_ID
+      environmentVariable: true
+      valueFrom:
+        secretKeyRef:
+          name: aws-credentials
+          key: AWS_ACCESS_KEY_ID
+    - key: AWS_SECRET_ACCESS_KEY
+      environmentVariable: true
+      valueFrom:
+        secretKeyRef:
+          name: aws-credentials
+          key: AWS_ACCESS_KEY_ID
 
   backend: |
     backend "local" {
       path = "/tmp/tfmodule/mytfstate.tfstate"
     }
 
-  workspace: prod
+  # workspace: dev
 
   destroy: false
   deleteCompletedJobs: false
 
-  retryLimit: 2
+  # retryLimit: 1
   
   # workspace: prod
 
@@ -33,12 +49,12 @@ spec:
   #   - key: AWS_ACCESS_KEY
   #     value: "ajwdhh1239ianwdjabwd"
   #     environmentVariable: true
-  #   - key: length
-  #     sensitive: false
-  #     valueFrom:
-  #       secretKeyRef:
-  #         name: tfrun
-  #         key: length
+    # - key: length
+    #   sensitive: false
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: tfrun
+    #       key: length
 
   # outputs:
   #   - key: my_output

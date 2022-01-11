@@ -72,8 +72,7 @@ spec:
         configMap:
           name: "terraform-env-config"
 
-  ## all outputs will be written to a secret by default
-  ## if provided, it will be available in the Status when you run kubectl describe run/[run-name]
+  ## outputs defined will be stored in a Kubernetes secret
   outputs:
     - key: my_new_output_name
       ## the output name from the module

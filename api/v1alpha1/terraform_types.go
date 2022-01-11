@@ -131,12 +131,11 @@ type TerraformStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	RunId            string              `json:"currentRunId"`
-	PreviousRuns     []PreviousRunStatus `json:"previousRuns,omitempty"`
-	Generation       int64               `json:"generation"`
-	RunStatus        TerraformRunStatus  `json:"runStatus"`
-	Message          string              `json:"message,omitempty"`
-	TerraformVersion string              `json:"terraformVersion"`
+	RunId        string              `json:"currentRunId"`
+	PreviousRuns []PreviousRunStatus `json:"previousRuns,omitempty"`
+	Generation   int64               `json:"generation"`
+	RunStatus    TerraformRunStatus  `json:"runStatus"`
+	Message      string              `json:"message,omitempty"`
 }
 
 //+kubebuilder:object:root=true

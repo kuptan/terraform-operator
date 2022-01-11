@@ -186,9 +186,7 @@ func getJobSpecForRun(
 		},
 	}
 
-	if t.Spec.RetryLimit > 0 {
-		job.Spec.BackoffLimit = &t.Spec.RetryLimit
-	}
+	job.Spec.BackoffLimit = &t.Spec.RetryLimit
 
 	return job
 }
