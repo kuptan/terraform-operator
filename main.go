@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
-	runv1alpha1 "github.com/kube-champ/terraform-operator/api/v1alpha1"
 	"github.com/kube-champ/terraform-operator/controllers"
 	"github.com/kube-champ/terraform-operator/pkg/kube"
 	"github.com/kube-champ/terraform-operator/pkg/utils"
@@ -47,7 +46,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(runv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

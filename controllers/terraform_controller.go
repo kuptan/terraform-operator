@@ -32,7 +32,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
-	runv1alpha1 "github.com/kube-champ/terraform-operator/api/v1alpha1"
 )
 
 // TerraformReconciler reconciles a Terraform object
@@ -113,7 +112,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 // SetupWithManager sets up the controller with the Manager.
 func (r *TerraformReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&runv1alpha1.Terraform{}).
+		For(&v1alpha1.Terraform{}).
 		Owns(&batchv1.Job{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Secret{}).
