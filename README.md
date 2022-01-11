@@ -1,6 +1,8 @@
 # Terraform Operator
 [![build](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml)
 
+[![runner](https://github.com/kube-champ/terraform-runner/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/kube-champ/terraform-runner/actions/workflows/build.yaml)
+
 The Terraform Operator provides support to run Terraform modules in Kubernetes in a declaritive way as a [Kubernetes manifest](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/).
 
 This projects makes defining and running a Terraform module, Kubernetes native through a single Kubernetes [CRD](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/). You can run the manifest with kubectl, Terraform, GitOps tools, etc...
@@ -14,8 +16,8 @@ This project is not a YAML to HCL converter. It just provides a way to run Terra
 **Helm**
 
 ```bash
-  helm repo add kubechamp https://kube-champ.github.io/terraform-operator
-  helm install terraform-operator kubechamp/terraform-operator
+  helm repo add kube-champ https://kube-champ.github.io/terraform-operator
+  helm install terraform-operator kube-champ/terraform-operator
 ```
 
 **Kubernetes Manifest**
@@ -54,8 +56,10 @@ spec:
   variables:
     - key: length
       value: "16"
+    
     - key: AWS_ACCESS_KEY
       valueFrom:
+        ## can be configMapKeyRef as well
         secretKeyRef:
           name: aws-credentials
           key: AWS_ACCESS_KEY
@@ -66,6 +70,7 @@ spec:
   variableFiles:
     - key: terraform-env-config
       valueFrom:
+        ## can be 'secret'
         configMap:
           name: "terraform-env-config"
 
@@ -75,8 +80,6 @@ spec:
     - key: my_new_output_name
       ## the output name from the module
       moduleOutputName: result
-      ## if set, it will mask the value in the run status
-      sensitive: false
 
   ## a flag to run a terraform destroy
   destroy: false

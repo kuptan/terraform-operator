@@ -24,5 +24,6 @@ testbin/*
 *.swo
 *~
 
+.DS_Store
 *kubeconfig
 *.env
