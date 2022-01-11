@@ -1,0 +1,63 @@
+package controllers
+
+import (
+	"context"
+
+	"github.com/kube-champ/terraform-operator/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+)
+
+func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName types.NamespacedName) error {
+	l := log.FromContext(context.Background())
+
+	run.SetRunId()
+	run.Status.TerraformVersion = run.Spec.TerraformVersion
+
+	_, err := run.CreateTerraformRun(namespacedName)
+
+	if err != nil {
+		l.Error(err, "failed create a terraform run")
+
+		run.Status.RunStatus = v1alpha1.RunFailed
+
+		r.Status().Update(context.Background(), run)
+
+		return err
+	}
+
+	run.Status.RunStatus = v1alpha1.RunStarted
+	run.Status.Generation = run.Generation
+
+	r.Status().Update(context.Background(), run)
+
+	return nil
+}
+
+func (r *TerraformReconciler) update(run *v1alpha1.Terraform, namespacedName types.NamespacedName) error {
+	run.PrepareForUpdate()
+
+	r.Recorder.Event(run, "Normal", "Updated", "Creating a new run job")
+
+	return r.create(run, namespacedName)
+}
+
+func (r *TerraformReconciler) updateOutputStatus(run *v1alpha1.Terraform, namespacedName types.NamespacedName) error {
+	secret, err := run.GetSecretById(namespacedName)
+
+	if err != nil {
+		return err
+	}
+
+	if len(run.Spec.Outputs) > 0 {
+		for key, value := range secret.Data {
+			output, exist := run.OutputLookup(key)
+
+			if exist {
+				run.AppendOutputToStatus(output, string(value))
+			}
+		}
+	}
+
+	return nil
+}

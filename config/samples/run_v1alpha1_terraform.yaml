@@ -1,0 +1,46 @@
+apiVersion: run.terraform-operator.io/v1alpha1
+kind: Terraform
+metadata:
+  name: terraform-sample
+spec:
+  terraformVersion: 1.0.2
+
+  module:
+    source: IbraheemAlSaady/test/module
+    version: 0.0.1
+
+  variables:
+    - key: length
+      value: "16"
+
+  backend: |
+    backend "local" {
+      path = "/tmp/tfmodule/mytfstate.tfstate"
+    }
+
+  workspace: prod
+
+  destroy: false
+  deleteCompletedJobs: false
+
+  retryLimit: 2
+  
+  # workspace: prod
+
+  # dependsOn: []
+
+  # variables:
+  #   - key: AWS_ACCESS_KEY
+  #     value: "ajwdhh1239ianwdjabwd"
+  #     environmentVariable: true
+  #   - key: length
+  #     sensitive: false
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: tfrun
+  #         key: length
+
+  # outputs:
+  #   - key: my_output
+  #     moduleOutputName: result
+  #     sensitive: false
