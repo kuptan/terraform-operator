@@ -14,18 +14,17 @@ This project is not a YAML to HCL converter. It just provides a way to run Terra
 **Helm**
 
 ```bash
-  helm repo add kube-champ https://kube-champ.github.io/terraform-operator
+  helm repo add kube-champ https://kube-champ.github.io/helm-charts
   helm install terraform-operator kube-champ/terraform-operator
 ```
 
-**Kubernetes Manifest**
+<!-- **Kubernetes Manifest**
 
 ```bash
-  
-```
-- install crds
-- install rbac
-- install deployment 
+  install crds
+  install role
+  install deployment
+``` -->
 
 ## Usage
 

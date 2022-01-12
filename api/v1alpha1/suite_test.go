@@ -61,7 +61,7 @@ var _ = BeforeSuite(func() {
 		ErrorIfCRDPathMissing: true,
 	}
 
-	os.Setenv("DOCKER_REPOSITRY", "docker.io")
+	os.Setenv("DOCKER_REGISTRY", "docker.io")
 	os.Setenv("TERRAFORM_RUNNER_IMAGE", "ibraheemalsaady/terraform-runner")
 	os.Setenv("TERRAFORM_RUNNER_IMAGE_TAG", "0.0.3")
 

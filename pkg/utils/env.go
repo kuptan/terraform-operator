@@ -26,7 +26,7 @@ func getEnvOrPanic(name string) string {
 func LoadEnv() {
 	cfg := &EnvConfig{}
 
-	cfg.DockerRepository = getEnvOrPanic("DOCKER_REPOSITRY")
+	cfg.DockerRepository = getEnvOrPanic("DOCKER_REGISTRY")
 	cfg.TerraformRunnerImage = getEnvOrPanic("TERRAFORM_RUNNER_IMAGE")
 	cfg.TerraformRunnerImageTag = getEnvOrPanic("TERRAFORM_RUNNER_IMAGE_TAG")
 
