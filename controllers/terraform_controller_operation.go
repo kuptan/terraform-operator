@@ -5,19 +5,16 @@ import (
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName types.NamespacedName) error {
-	l := log.FromContext(context.Background())
-
 	run.SetRunId()
 	run.Status.Generation = run.Generation
 
 	_, err := run.CreateTerraformRun(namespacedName)
 
 	if err != nil {
-		l.Error(err, "failed create a terraform run")
+		r.Log.Error(err, "failed create a terraform run")
 
 		run.Status.RunStatus = v1alpha1.RunFailed
 

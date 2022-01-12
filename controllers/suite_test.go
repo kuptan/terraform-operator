@@ -91,6 +91,7 @@ var _ = BeforeSuite(func() {
 	err = (&TerraformReconciler{
 		Client:   k8sClient,
 		Recorder: k8sManager.GetEventRecorderFor("terraform-controller"),
+		Log:      ctrl.Log.WithName("controllers").WithName("TerraformController"),
 	}).SetupWithManager(k8sManager)
 
 	kube.ClientSet = fake.NewSimpleClientset()

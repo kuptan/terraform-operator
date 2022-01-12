@@ -26,11 +26,11 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/go-logr/logr"
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
 )
 
@@ -39,6 +39,7 @@ type TerraformReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
+	Log      logr.Logger
 }
 
 //+kubebuilder:rbac:groups=run.terraform-operator.io,resources=terraforms,verbs=get;list;watch;create;update;patch;delete
@@ -55,9 +56,7 @@ type TerraformReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	l := log.FromContext(ctx)
-
-	l.Info("Starting reconcile loop run", "NamespacedName", req.NamespacedName)
+	r.Log.Info("Starting reconcile loop run", "NamespacedName", req.NamespacedName)
 
 	run := &v1alpha1.Terraform{}
 
@@ -69,7 +68,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if run.IsSubmitted() {
-		l.Info("initializing a terraform run")
+		r.Log.Info("initializing a terraform run")
 
 		if err := r.create(run, req.NamespacedName); err != nil {
 			return ctrl.Result{}, err
@@ -81,8 +80,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if run.IsStarted() {
-		l.Info("watching job run to complete")
-
 		requeue, err := r.watchRun(run, req.NamespacedName)
 
 		if err != nil {
@@ -90,14 +87,14 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 
 		if requeue {
-			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
 
 		return ctrl.Result{}, nil
 	}
 
 	if run.IsUpdated() {
-		l.Info("updating a terraform run")
+		r.Log.Info("updating a terraform run")
 
 		if err := r.update(run, req.NamespacedName); err != nil {
 			return ctrl.Result{}, err

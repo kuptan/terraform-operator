@@ -13,7 +13,7 @@ import (
 )
 
 var _ = Describe("Terraform Controller", func() {
-	const timeout = time.Second * 10
+	const timeout = time.Second * 30
 	const interval = time.Second * 1
 
 	BeforeEach(func() {

@@ -2,19 +2,17 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (bool, error) {
-	l := log.FromContext(context.Background())
-
 	job, err := run.GetJobByRun()
 
-	l.Info("watching job", "name", job.Name)
+	r.Log.Info("watching job run to complete", "name", job.Name)
 
 	if err != nil {
 		return false, err
@@ -39,9 +37,13 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 
 	// job is successful
 	if job.Status.Succeeded > 0 {
+		r.Log.Info("terraform run job completed successfully")
+
 		if run.Spec.DeleteCompletedJobs {
+			r.Log.Info("deleting completed job")
+
 			if err := run.DeleteAfterCompletion(); err != nil {
-				l.Error(err, "failed to delete run job after completion")
+				r.Log.Error(err, "failed to delete run job after completion", "name", job.Name)
 			} else {
 				r.Recorder.Event(run, "Normal", "Cleanup", fmt.Sprintf("Run(%s) kubernetes job was deleted", run.Status.RunId))
 			}
@@ -62,6 +64,7 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 	// if it got here, then the job is failed -- sadly .... :( :( :(
 	run.Status.RunStatus = v1alpha1.RunFailed
 	r.Recorder.Event(run, "Warning", "Failed", fmt.Sprintf("Run(%s) failed", run.Status.RunId))
+	r.Log.Error(errors.New("job failed"), "terraform run job failed to complete", "name", job.Name)
 
 	r.Status().Update(context.Background(), run)
 
