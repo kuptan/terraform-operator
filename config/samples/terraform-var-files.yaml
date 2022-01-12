@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: var-files-data
+data:
+  common.tfvars: |-
+    length = 20
+---
+apiVersion: run.terraform-operator.io/v1alpha1
+kind: Terraform
+metadata:
+  name: terraform-var-files
+spec:
+  terraformVersion: 1.0.2
+
+  module:
+    source: IbraheemAlSaady/test/module
+    version: 0.0.2
+
+  # variables:
+  #   - key: length
+  #     value: "16"
+
+  variableFiles:
+    - key: common-config
+      valueFrom:
+        configMap:
+          name: var-files-data

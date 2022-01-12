@@ -87,3 +87,5 @@ spec:
   ## number of retries in case of run failure
   retryLimit: 2
 ```
+
+For more example on how to use this CRD, check the [samples](./config/samples)

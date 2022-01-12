@@ -13,6 +13,10 @@ func getTerraformModuleFromTemplate(run *Terraform) ([]byte, error) {
 	
 		required_version = "~> {{.Spec.TerraformVersion}}"
 	}
+
+	{{- if .Spec.ProvidersConfig }}
+	{{.Spec.ProvidersConfig}}
+	{{- end}}
 	
 	{{- range .Spec.Variables}}
 	{{- if not .EnvironmentVariable }}

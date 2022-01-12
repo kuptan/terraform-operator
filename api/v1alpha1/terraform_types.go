@@ -100,6 +100,9 @@ type TerraformSpec struct {
 	// A custom terrafor backend configuration
 	// +optional
 	Backend string `json:"backend,omitempty"`
+	// A custom terrafor providers configuration
+	// +optional
+	ProvidersConfig string `json:"providersConfig,omitempty"`
 	// The terraform workspae
 	// +optional
 	Workspace string `json:"workspace,omitempty"`

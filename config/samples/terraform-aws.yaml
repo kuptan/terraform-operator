@@ -1,7 +1,7 @@
 apiVersion: run.terraform-operator.io/v1alpha1
 kind: Terraform
 metadata:
-  name: terraform-sample
+  name: terraform-aws-s3
 spec:
   terraformVersion: 1.0.2
 
@@ -11,11 +11,10 @@ spec:
 
   variables:
     - key: name
-      value: "my bucket"
+      value: "mytestrandombucket"
     - key: AWS_DEFAULT_REGION
       value: eu-west-1
       environmentVariable: true
-      value: "my bucket"
     - key: AWS_ACCESS_KEY_ID
       environmentVariable: true
       valueFrom:
@@ -27,11 +26,25 @@ spec:
       valueFrom:
         secretKeyRef:
           name: aws-credentials
-          key: AWS_ACCESS_KEY_ID
+          key: AWS_SECRET_ACCESS_KEY
 
   backend: |
     backend "local" {
       path = "/tmp/tfmodule/mytfstate.tfstate"
+    }
+  
+  providersConfig: |
+    terraform {
+      required_providers {
+        aws = {
+          source  = "hashicorp/aws"
+          version = "~> 3.0"
+        }
+      }
+    }
+
+    provider "aws" {
+      region = "eu-west-1"
     }
 
   # workspace: dev
@@ -39,24 +52,9 @@ spec:
   destroy: false
   deleteCompletedJobs: false
 
-  # retryLimit: 1
+  retryLimit: 1
   
-  # workspace: prod
-
-  # dependsOn: []
-
-  # variables:
-  #   - key: AWS_ACCESS_KEY
-  #     value: "ajwdhh1239ianwdjabwd"
-  #     environmentVariable: true
-    # - key: length
-    #   sensitive: false
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: tfrun
-    #       key: length
-
-  # outputs:
-  #   - key: my_output
-  #     moduleOutputName: result
-  #     sensitive: false
+  outputs:
+    - key: bucket_id
+      moduleOutputName: id 
+      sensitive: false

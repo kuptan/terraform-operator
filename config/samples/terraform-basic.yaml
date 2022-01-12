@@ -1,0 +1,31 @@
+apiVersion: run.terraform-operator.io/v1alpha1
+kind: Terraform
+metadata:
+  name: terraform-basic
+spec:
+  terraformVersion: 1.0.2
+
+  module:
+    source: IbraheemAlSaady/test/module/
+    version: 0.0.2
+
+  variables:
+    - key: length
+      value: 16
+
+  backend: |
+    backend "local" {
+      path = "/tmp/tfmodule/mytfstate.tfstate"
+    }
+  
+  # workspace: dev
+
+  destroy: false
+  deleteCompletedJobs: false
+
+  retryLimit: 1
+
+  outputs:
+    - key: my_output
+      moduleOutputName: result
+      sensitive: false

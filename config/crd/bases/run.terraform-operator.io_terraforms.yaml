@@ -76,6 +76,9 @@ spec:
                       type: string
                   type: object
                 type: array
+              providersConfig:
+                description: A custom terrafor providers configuration
+                type: string
               retryLimit:
                 description: A retry limit to be set on the Job as a backOffLimit
                 format: int32
