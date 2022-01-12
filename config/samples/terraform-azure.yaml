@@ -66,4 +66,3 @@ spec:
   outputs:
     - key: storage_account_id
       moduleOutputName: id 
-      sensitive: false

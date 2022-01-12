@@ -6,12 +6,12 @@ spec:
   terraformVersion: 1.0.2
 
   module:
-    source: IbraheemAlSaady/test/module/
+    source: IbraheemAlSaady/test/module
     version: 0.0.2
 
   variables:
     - key: length
-      value: 16
+      value: "16"
 
   backend: |
     backend "local" {
@@ -28,4 +28,3 @@ spec:
   outputs:
     - key: my_output
       moduleOutputName: result
-      sensitive: false

@@ -57,4 +57,3 @@ spec:
   outputs:
     - key: bucket_id
       moduleOutputName: id 
-      sensitive: false

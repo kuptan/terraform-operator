@@ -42,7 +42,6 @@ func getTerraformModuleFromTemplate(run *Terraform) ([]byte, error) {
 	
 	{{- range .Spec.Outputs}}
 	output "{{.Key}}" {
-		sensitive = {{.Sensitive}}
 		value = module.operator.{{.ModuleOutputName}}
 	}
 	{{- end}}`)

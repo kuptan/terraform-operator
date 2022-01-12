@@ -26,7 +26,7 @@ var _ = Describe("TerraformRun", func() {
 	var created, fetched *Terraform
 
 	Context("Create run", func() {
-		It("should create a terraform run successfully", func() {
+		It("should create a Terraform Object", func() {
 			created = &Terraform{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",

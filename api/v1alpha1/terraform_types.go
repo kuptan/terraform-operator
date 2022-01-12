@@ -214,6 +214,10 @@ func (t *Terraform) GetOwnerReference() metav1.OwnerReference {
 
 // Creates a terraform Run as a Kubernetes job
 func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*batchv1.Job, error) {
+	if err := createRbacConfigIfNotExist(namespacedName.Namespace); err != nil {
+		return nil, err
+	}
+
 	configMap, err := createConfigMapForModule(namespacedName, t)
 
 	if err != nil {
