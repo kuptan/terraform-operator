@@ -12,6 +12,7 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 	l := log.FromContext(context.Background())
 
 	run.SetRunId()
+	run.Status.Generation = run.Generation
 
 	_, err := run.CreateTerraformRun(namespacedName)
 
@@ -26,7 +27,6 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 	}
 
 	run.Status.RunStatus = v1alpha1.RunStarted
-	run.Status.Generation = run.Generation
 
 	r.Status().Update(context.Background(), run)
 

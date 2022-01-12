@@ -162,10 +162,12 @@ type TerraformList struct {
 	Items           []Terraform `json:"items"`
 }
 
+// this evaluate the first time the object was created
 func (t *Terraform) IsSubmitted() bool {
 	return t.Status.Generation == 0 && t.Status.RunId == ""
 }
 
+// the run is either started or running
 func (t *Terraform) IsStarted() bool {
 	allowedStatuses := map[TerraformRunStatus]bool{
 		RunStarted: true,
@@ -175,12 +177,14 @@ func (t *Terraform) IsStarted() bool {
 	return allowedStatuses[t.Status.RunStatus]
 }
 
+// check if the status is running
 func (t *Terraform) IsRunning() bool {
 	return t.Status.RunStatus == RunRunning
 }
 
+// check if the object was updated
 func (t *Terraform) IsUpdated() bool {
-	return t.Generation > 0 && t.Generation != t.Status.Generation
+	return t.Generation > 0 && t.Generation > t.Status.Generation
 }
 
 func (t *Terraform) HasErrored() bool {
