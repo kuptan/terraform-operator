@@ -10,12 +10,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const runnerRBACName string = "terraform-runner"
-
-func createServiceAccount(namespace string) (*corev1.ServiceAccount, error) {
+func createServiceAccount(name string, namespace string) (*corev1.ServiceAccount, error) {
 	key := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      runnerRBACName,
+			Name:      name,
 			Namespace: namespace,
 		},
 	}
@@ -29,21 +27,21 @@ func createServiceAccount(namespace string) (*corev1.ServiceAccount, error) {
 	return sa, nil
 }
 
-func createRoleBinding(namespace string) (*rbacv1.RoleBinding, error) {
+func createRoleBinding(name string, namespace string) (*rbacv1.RoleBinding, error) {
 	key := &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      runnerRBACName,
+			Name:      name,
 			Namespace: namespace,
 		},
 		RoleRef: rbacv1.RoleRef{
 			Kind:     "ClusterRole",
-			Name:     runnerRBACName,
+			Name:     name,
 			APIGroup: "rbac.authorization.k8s.io",
 		},
 		Subjects: []rbacv1.Subject{
 			rbacv1.Subject{
 				Kind:      "ServiceAccount",
-				Name:      runnerRBACName,
+				Name:      name,
 				Namespace: namespace,
 			},
 		},
@@ -58,8 +56,8 @@ func createRoleBinding(namespace string) (*rbacv1.RoleBinding, error) {
 	return role, nil
 }
 
-func isServiceAccountExist(namespace string) (bool, error) {
-	_, err := kube.ClientSet.CoreV1().ServiceAccounts(namespace).Get(context.Background(), runnerRBACName, metav1.GetOptions{})
+func isServiceAccountExist(name string, namespace string) (bool, error) {
+	_, err := kube.ClientSet.CoreV1().ServiceAccounts(namespace).Get(context.Background(), name, metav1.GetOptions{})
 
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -72,8 +70,8 @@ func isServiceAccountExist(namespace string) (bool, error) {
 	return true, nil
 }
 
-func isRoleBindingExist(namespace string) (bool, error) {
-	_, err := kube.ClientSet.RbacV1().RoleBindings(namespace).Get(context.Background(), runnerRBACName, metav1.GetOptions{})
+func isRoleBindingExist(name string, namespace string) (bool, error) {
+	_, err := kube.ClientSet.RbacV1().RoleBindings(namespace).Get(context.Background(), name, metav1.GetOptions{})
 
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -86,25 +84,25 @@ func isRoleBindingExist(namespace string) (bool, error) {
 	return true, nil
 }
 
-func createRbacConfigIfNotExist(namespace string) error {
-	saExist, err := isServiceAccountExist(namespace)
+func createRbacConfigIfNotExist(name string, namespace string) error {
+	saExist, err := isServiceAccountExist(name, namespace)
 
 	if err != nil {
 		return err
 	}
 
-	roleBindingExist, err := isRoleBindingExist(namespace)
+	roleBindingExist, err := isRoleBindingExist(name, namespace)
 
 	if err != nil {
 		return err
 	}
 
 	if !saExist && !roleBindingExist {
-		if _, err := createServiceAccount(namespace); err != nil {
+		if _, err := createServiceAccount(name, namespace); err != nil {
 			return err
 		}
 
-		if _, err := createRoleBinding(namespace); err != nil {
+		if _, err := createRoleBinding(name, namespace); err != nil {
 			return err
 		}
 	}

@@ -216,9 +216,11 @@ func (t *Terraform) GetOwnerReference() metav1.OwnerReference {
 	}
 }
 
+const runnerRBACName string = "terraform-runner"
+
 // Creates a terraform Run as a Kubernetes job
 func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*batchv1.Job, error) {
-	if err := createRbacConfigIfNotExist(namespacedName.Namespace); err != nil {
+	if err := createRbacConfigIfNotExist(runnerRBACName, namespacedName.Namespace); err != nil {
 		return nil, err
 	}
 
