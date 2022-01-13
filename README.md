@@ -7,7 +7,7 @@ This projects makes defining and running a Terraform module, Kubernetes native t
 
 **Disclaimer**
 
-This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works underhood, have a look at the [design doc](./docs/design.md)
+This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works, have a look at the [design doc](./docs/design.md)
 
 ## Installation
 
