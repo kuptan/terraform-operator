@@ -1,0 +1,2 @@
+resources:
+- terraform-operator.yaml
