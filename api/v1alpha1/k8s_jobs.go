@@ -176,7 +176,7 @@ func getJobSpecForRun(
 							Image:           getTerraformDockerImage(),
 							VolumeMounts:    mounts,
 							Env:             envVars,
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
 					},
 					Volumes:       volumes,
