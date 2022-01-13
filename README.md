@@ -45,6 +45,7 @@ spec:
 
   module:
     source: IbraheemAlSaady/test/module
+    ## optional module version
     version:
 
    ## a terraform workspace to select
@@ -55,6 +56,9 @@ spec:
     backend "local" {
       path = "/tmp/tfmodule/mytfstate.tfstate"
     }
+
+  ## a custom providers config
+  providersConfig:
 
   ## a list of terraform variables to be provided
   variables:
@@ -94,4 +98,4 @@ spec:
   retryLimit: 2
 ```
 
-For more example on how to use this CRD, check the [samples](./config/samples)
+For more examples on how to use this CRD, check the [samples](./config/samples)
