@@ -39,10 +39,10 @@ module "operator" {
   version =  "0.0.1"
 
   length = var.length
+}
 
-  output "result" {
-    value = module.operator.result
-  }
+output "result" {
+  value = module.operator.result
 }
 
 ```
@@ -55,5 +55,6 @@ Aside from the Job, with each Terraform run, the controller will create the foll
 
 1. **ConfigMap:** this will contain the module rendered as shown above and will be mounted into the terraform runner job
 2. **Secret:** for outputs to be stored
+3. **service account & role binding** the terraform runner require access to the secret to write outputs. If the service account and role binding were not found in the namespace where the Terraform object was created, it will create them
 
 If `spec.outputs` were defined in the manifest, the outputs will be added to the secret created by the controller
