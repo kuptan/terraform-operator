@@ -18,6 +18,8 @@ This project is not a YAML to HCL converter. It just provides a way to run Terra
   helm install terraform-operator kube-champ/terraform-operator
 ```
 
+Chart can be found [here](https://github.com/kube-champ/helm-charts/tree/master/charts/terraform-operator)
+
 **Kubectl**
 
 ```bash
