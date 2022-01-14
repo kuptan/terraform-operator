@@ -24,6 +24,8 @@ testbin/*
 *.swo
 *~
 
-.DS_Store
+**/.DS_Store
 *kubeconfig
 *.env
+
+**/*k8s-secret.yaml

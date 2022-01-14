@@ -6,8 +6,8 @@ spec:
   terraformVersion: 1.0.2
 
   module:
-    source: IbraheemAlSaady/test/module
-    version: 0.0.2
+    source: git::ssh://git@github.com/kube-champ/terraform-k8s-argocd-bootstrap.git
+    # version: 0.0.2
 
   variables:
     - key: length
@@ -17,7 +17,12 @@ spec:
     backend "local" {
       path = "/tmp/tfmodule/mytfstate.tfstate"
     }
-  
+
+  gitSSHKey:
+    valueFrom:
+      secret:
+        secretName: git-ssh-key
+
   # workspace: dev
 
   destroy: false
