@@ -70,10 +70,12 @@ var _ = Describe("Kubernetes RBAC", func() {
 			for _, v := range job.Spec.Template.Spec.Volumes {
 				if v.Name == gitSSHKeyVolumeName {
 					sshVolume = &v
+					break
 				}
 			}
 
 			Expect(sshVolume).ToNot(BeNil())
+			Expect(sshVolume.Name).To(Equal(gitSSHKeyVolumeName))
 			Expect(sshVolume.VolumeSource.Secret.SecretName).To(Equal(run.Spec.GitSSHKey.ValueFrom.Secret.SecretName))
 		})
 	})
