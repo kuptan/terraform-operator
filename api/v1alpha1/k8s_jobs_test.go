@@ -74,7 +74,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 			}
 
 			Expect(sshVolume).ToNot(BeNil())
-			Expect(sshVolume.Secret.SecretName).To(Equal(run.Spec.GitSSHKey.ValueFrom.Secret.SecretName))
+			Expect(sshVolume.VolumeSource.Secret.SecretName).To(Equal(run.Spec.GitSSHKey.ValueFrom.Secret.SecretName))
 		})
 	})
 })
