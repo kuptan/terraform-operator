@@ -13,13 +13,14 @@ import (
 )
 
 const (
-	tfVarsMountPath          string = "/tmp/tfvars"
-	moduleWorkingDir         string = "/tmp/tfmodule"
-	conifgMapModuleMountPath string = "/terraform/modules"
-	gitSSHKeyMountPath       string = "/tmp/ssh"
+	tfVarsMountPath           string = "/tmp/tfvars"
+	moduleWorkingDirMountPath string = "/tmp/tfmodule"
+	conifgMapModuleMountPath  string = "/terraform/modules"
+	gitSSHKeyMountPath        string = "/root/.ssh"
 
-	emptyDirVolumeName  string = "tfmodule"
-	gitSSHKeyVolumeName string = "git-ssh"
+	knownHostsVolumeName string = "known-hosts"
+	emptyDirVolumeName   string = "tfmodule"
+	gitSSHKeyVolumeName  string = "git-ssh"
 )
 
 func getTerraformRunnerDockerImage() string {
@@ -47,7 +48,7 @@ func (t *Terraform) getRunnerSpecificEnvVars() []corev1.EnvVar {
 	envVars := []corev1.EnvVar{}
 
 	envVars = append(envVars, getEnvVariable("TERRAFORM_VERSION", t.Spec.TerraformVersion))
-	envVars = append(envVars, getEnvVariable("TERRAFORM_WORKING_DIR", moduleWorkingDir))
+	envVars = append(envVars, getEnvVariable("TERRAFORM_WORKING_DIR", moduleWorkingDirMountPath))
 	envVars = append(envVars, getEnvVariable("TERRAFORM_VAR_FILES_PATH", tfVarsMountPath))
 	envVars = append(envVars, getEnvVariable("OUTPUT_SECRET_NAME", getUniqueResourceName(t.Name, t.Status.RunId)))
 	envVars = append(envVars, getEnvVariable("TERRAFORM_DESTROY", strconv.FormatBool(t.Spec.Destroy)))
@@ -96,6 +97,7 @@ func (t *Terraform) getRunnerSpecificVolumes() []corev1.Volume {
 
 	if t.Spec.GitSSHKey != nil && t.Spec.GitSSHKey.ValueFrom != nil {
 		volumes = append(volumes, getVolumeSpec(gitSSHKeyVolumeName, *t.Spec.GitSSHKey.ValueFrom))
+		volumes = append(volumes, getVolumeSpecFromConfigMap(knownHostsVolumeName, utils.Env.KnownHostsConfigMapName))
 	}
 
 	return volumes
@@ -117,11 +119,18 @@ func (t *Terraform) getJobVolumes() []corev1.Volume {
 func (t *Terraform) getRunnerSpecificVolumeMounts() []corev1.VolumeMount {
 	mounts := []corev1.VolumeMount{}
 
-	mounts = append(mounts, getVolumeMountSpec(emptyDirVolumeName, moduleWorkingDir, false))
+	mounts = append(mounts, getVolumeMountSpec(emptyDirVolumeName, moduleWorkingDirMountPath, false))
 	mounts = append(mounts, getVolumeMountSpec(getUniqueResourceName(t.Name, t.Status.RunId), conifgMapModuleMountPath, false))
 
 	if t.Spec.GitSSHKey != nil && t.Spec.GitSSHKey.ValueFrom != nil {
-		mounts = append(mounts, getVolumeMountSpec(gitSSHKeyVolumeName, gitSSHKeyMountPath, false))
+		sshKeyFileName := "id_rsa"
+		sshKnownHostsFileName := "known_hosts"
+
+		sshKeyMountPath := fmt.Sprintf("%s/%s", gitSSHKeyMountPath, sshKeyFileName)
+		sshKnownHostsMountPath := fmt.Sprintf("%s/%s", gitSSHKeyMountPath, sshKnownHostsFileName)
+
+		mounts = append(mounts, getVolumeMountSpecWithSubPath(gitSSHKeyVolumeName, sshKeyMountPath, sshKeyFileName, false))
+		mounts = append(mounts, getVolumeMountSpecWithSubPath(knownHostsVolumeName, sshKnownHostsMountPath, sshKnownHostsFileName, false))
 	}
 
 	return mounts
@@ -141,13 +150,10 @@ func (t *Terraform) getJobVolumeMounts() []corev1.VolumeMount {
 }
 
 // returnrs the initContainers definition for the run job
-func getInitContainersSpec(configMap *corev1.ConfigMap, t *Terraform) []corev1.Container {
+func getInitContainersSpec(t *Terraform) []corev1.Container {
 	containers := []corev1.Container{}
 
-	// cpModule := fmt.Sprintf("cp -a %s/. %s/", conifgMapModuleMountPath, moduleWorkingDir)
-	// cpGitKey := fmt.Sprintf("cp -a %s/. %s/", gitSSHKeyMountPath, moduleWorkingDir)
-
-	cmd := `cp /tmp/ssh/id_rsa /tmp/tfmodule/id_rsa && cp /terraform/modules/main.tf /tmp/tfmodule/main.tf && chmod 600 /tmp/tfmodule/id_rsa`
+	cpModule := fmt.Sprintf("cp %s/main.tf %s/main.tf", conifgMapModuleMountPath, moduleWorkingDirMountPath)
 
 	commands := []string{
 		"/bin/sh",
@@ -155,7 +161,7 @@ func getInitContainersSpec(configMap *corev1.ConfigMap, t *Terraform) []corev1.C
 	}
 
 	args := []string{
-		cmd,
+		cpModule,
 	}
 
 	containers = append(containers, corev1.Container{
@@ -170,15 +176,7 @@ func getInitContainersSpec(configMap *corev1.ConfigMap, t *Terraform) []corev1.C
 }
 
 // returns a Kubernetes job struct to run the terraform
-func getJobSpecForRun(
-	t *Terraform,
-	configMap *corev1.ConfigMap,
-	secret *corev1.Secret,
-	owner metav1.OwnerReference) *batchv1.Job {
-
-	// envVars := append(getEnvVariables(t.Spec.Variables), t.getRunnerSpecificEnvVars(secret)...)
-	// volumes := append(getJobVolumes(t.Spec.VariableFiles), t.getRunnerSpecificVolumes(configMap)...)
-	// mounts := append(getJobVolumeMounts(t.Spec.VariableFiles), t.getRunnerSpecificVolumeMounts(configMap)...)
+func getJobSpecForRun(t *Terraform, owner metav1.OwnerReference) *batchv1.Job {
 
 	envVars := t.getEnvVariables()
 	volumes := t.getJobVolumes()
@@ -200,7 +198,7 @@ func getJobSpecForRun(
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: "terraform-runner",
-					InitContainers:     getInitContainersSpec(configMap, t),
+					InitContainers:     getInitContainersSpec(t),
 					Containers: []corev1.Container{
 						{
 							Name:            "terraform",
@@ -242,7 +240,7 @@ func createJobForRun(run *Terraform, configMap *corev1.ConfigMap, secret *corev1
 
 	ownerRef := run.GetOwnerReference()
 
-	job := getJobSpecForRun(run, configMap, secret, ownerRef)
+	job := getJobSpecForRun(run, ownerRef)
 
 	if _, err := jobs.Create(context.TODO(), job, metav1.CreateOptions{}); err != nil {
 		return nil, err

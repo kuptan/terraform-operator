@@ -45,6 +45,16 @@ func getVolumeMountSpec(volumeName string, mountPath string, readOnly bool) core
 	}
 }
 
+// returns a volume mount spec with subpath option
+func getVolumeMountSpecWithSubPath(volumeName string, mountPath string, subPath string, readOnly bool) corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:      volumeName,
+		MountPath: mountPath,
+		ReadOnly:  readOnly,
+		SubPath:   subPath,
+	}
+}
+
 func getEnvVariable(name string, value string) corev1.EnvVar {
 	return corev1.EnvVar{
 		Name:  name,

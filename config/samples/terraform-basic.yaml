@@ -6,7 +6,7 @@ spec:
   terraformVersion: 1.0.2
 
   module:
-    source: git::ssh://git@github.com/kube-champ/terraform-k8s-argocd-bootstrap.git
+    source: git::ssh://git@github.com/IbraheemAlSaady/terraform-module-test.git
     # version: 0.0.2
 
   variables:
@@ -18,10 +18,11 @@ spec:
       path = "/tmp/tfmodule/mytfstate.tfstate"
     }
 
-  gitSSHKey:
-    valueFrom:
-      secret:
-        secretName: git-ssh-key
+  # gitSSHKey:
+  #   valueFrom:
+  #     secret:
+  #       secretName: git-ssh-key
+  #       defaultMode: 0600
 
   # workspace: dev
 
