@@ -18,8 +18,8 @@ metadata:
   name: terraform-operator
   labels:
     app: terraform-operator
-    version: "0.0.1"
-    app.kubernetes.io/version: "0.0.1"
+    version: "0.0.2"
+    app.kubernetes.io/version: "0.0.2"
     app.kubernetes.io/part-of: "terraform-operator"
 rules:
 - apiGroups: [""]
@@ -110,8 +110,8 @@ metadata:
   name: terraform-runner
   labels:
     app: terraform-operator
-    version: "0.0.1"
-    app.kubernetes.io/version: "0.0.1"
+    version: "0.0.2"
+    app.kubernetes.io/version: "0.0.2"
     app.kubernetes.io/part-of: "terraform-operator"
 rules:
 - apiGroups: [""]
@@ -125,8 +125,8 @@ metadata:
   name: terraform-operator
   labels:
     app: terraform-operator
-    version: "0.0.1"
-    app.kubernetes.io/version: "0.0.1"
+    version: "0.0.2"
+    app.kubernetes.io/version: "0.0.2"
     app.kubernetes.io/part-of: "terraform-operator"
 subjects:
 - kind: ServiceAccount
@@ -172,8 +172,8 @@ spec:
     metadata:
       labels:
         app: terraform-operator
-        version: "0.0.1"
-        app.kubernetes.io/version: "0.0.1"
+        version: "0.0.2"
+        app.kubernetes.io/version: "0.0.2"
         app.kubernetes.io/part-of: "terraform-operator"
     spec:
       serviceAccountName: terraform-operator
@@ -183,7 +183,7 @@ spec:
 
       containers:
         - name: terraform-operator
-          image: docker.io/kubechamp/terraform-operator:0.0.1
+          image: docker.io/kubechamp/terraform-operator:0.0.2
           imagePullPolicy: IfNotPresent
 
           securityContext:

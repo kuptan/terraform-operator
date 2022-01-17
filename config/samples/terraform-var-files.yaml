@@ -17,10 +17,6 @@ spec:
     source: IbraheemAlSaady/test/module
     version: 0.0.2
 
-  # variables:
-  #   - key: length
-  #     value: "16"
-
   variableFiles:
     - key: common-config
       valueFrom:

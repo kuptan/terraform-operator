@@ -18,11 +18,11 @@ spec:
       path = "/tmp/tfmodule/mytfstate.tfstate"
     }
 
-  # gitSSHKey:
-  #   valueFrom:
-  #     secret:
-  #       secretName: git-ssh-key
-  #       defaultMode: 0600
+  gitSSHKey:
+    valueFrom:
+      secret:
+        secretName: git-ssh-key
+        defaultMode: 0600
 
   # workspace: dev
 

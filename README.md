@@ -100,4 +100,4 @@ spec:
   retryLimit: 2
 ```
 
-For more examples on how to use this CRD, check the [samples](./config/samples)
+For more examples on how to use this CRD, check the [samples](./config/samples/README.md)
