@@ -62,6 +62,7 @@ var _ = BeforeSuite(func() {
 	os.Setenv("DOCKER_REGISTRY", "docker.io")
 	os.Setenv("TERRAFORM_RUNNER_IMAGE", "ibraheemalsaady/terraform-runner")
 	os.Setenv("TERRAFORM_RUNNER_IMAGE_TAG", "0.0.3")
+	os.Setenv("KNOWN_HOSTS_CONFIGMAP_NAME", "operator-known-hosts")
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{

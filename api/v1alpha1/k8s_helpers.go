@@ -12,6 +12,20 @@ func getVolumeSpec(name string, source corev1.VolumeSource) corev1.Volume {
 	}
 }
 
+// returns a volume spec from configMap
+func getVolumeSpecFromConfigMap(volumeName string, configMapName string) corev1.Volume {
+	return corev1.Volume{
+		Name: volumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: configMapName,
+				},
+			},
+		},
+	}
+}
+
 // returns and emptyDir volume spec
 func getEmptyDirVolume(name string) corev1.Volume {
 	return corev1.Volume{
@@ -31,6 +45,16 @@ func getVolumeMountSpec(volumeName string, mountPath string, readOnly bool) core
 	}
 }
 
+// returns a volume mount spec with subpath option
+func getVolumeMountSpecWithSubPath(volumeName string, mountPath string, subPath string, readOnly bool) corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:      volumeName,
+		MountPath: mountPath,
+		ReadOnly:  readOnly,
+		SubPath:   subPath,
+	}
+}
+
 func getEnvVariable(name string, value string) corev1.EnvVar {
 	return corev1.EnvVar{
 		Name:  name,
@@ -46,5 +70,21 @@ func getEnvVariableFromFieldSelector(name string, path string) corev1.EnvVar {
 				FieldPath: path,
 			},
 		},
+	}
+}
+
+func getInitContainer(name string, image string, mounts []corev1.VolumeMount, cmd string) corev1.Container {
+	commands := []string{
+		"/bin/sh",
+		"-c",
+	}
+
+	commands = append(commands, cmd)
+
+	return corev1.Container{
+		Name:         name,
+		Image:        image,
+		VolumeMounts: mounts,
+		Command:      commands,
 	}
 }

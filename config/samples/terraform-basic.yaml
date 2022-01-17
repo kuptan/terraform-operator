@@ -6,8 +6,8 @@ spec:
   terraformVersion: 1.0.2
 
   module:
-    source: IbraheemAlSaady/test/module
-    version: 0.0.2
+    source: git::ssh://git@github.com/IbraheemAlSaady/terraform-module-test.git
+    # version: 0.0.2
 
   variables:
     - key: length
@@ -17,7 +17,13 @@ spec:
     backend "local" {
       path = "/tmp/tfmodule/mytfstate.tfstate"
     }
-  
+
+  # gitSSHKey:
+  #   valueFrom:
+  #     secret:
+  #       secretName: git-ssh-key
+  #       defaultMode: 0600
+
   # workspace: dev
 
   destroy: false

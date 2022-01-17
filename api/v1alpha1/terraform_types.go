@@ -68,6 +68,11 @@ type OutputSpec struct {
 	ModuleOutputName string `json:"moduleOutputName"`
 }
 
+// GitSSHKey config
+type GitSSHKeySpec struct {
+	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
+}
+
 type TerraformRunStatus string
 
 const (
@@ -127,6 +132,9 @@ type TerraformSpec struct {
 	// A retry limit to be set on the Job as a backOffLimit
 	// +optional
 	RetryLimit int32 `json:"retryLimit,omitempty"`
+	// An SSH key to be able to run terraform on private git repositories
+	// +optional
+	GitSSHKey *GitSSHKeySpec `json:"gitSSHKey,omitempty"`
 }
 
 // TerraformStatus defines the observed state of Terraform
