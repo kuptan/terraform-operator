@@ -141,7 +141,8 @@ func (t *Terraform) getJobVolumeMounts() []corev1.VolumeMount {
 	mounts := []corev1.VolumeMount{}
 
 	for _, file := range t.Spec.VariableFiles {
-		mounts = append(mounts, getVolumeMountSpec(file.Key, tfVarsMountPath, true))
+		mountPath := fmt.Sprintf("%s/%s", tfVarsMountPath, file.Key)
+		mounts = append(mounts, getVolumeMountSpec(file.Key, mountPath, true))
 	}
 
 	mounts = append(mounts, t.getRunnerSpecificVolumeMounts()...)
