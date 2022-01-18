@@ -62,7 +62,7 @@ var _ = Describe("Kubernetes Helpers", func() {
 			Expect(mount).ToNot(BeNil())
 			Expect(mount.Name).To(Equal("vol1"))
 			Expect(mount.MountPath).To(Equal("/tmp/file.tf"))
-			Expect(mount.SubPath).To(Equal("/file.tf"))
+			Expect(mount.SubPath).To(Equal("file.tf"))
 			Expect(mount.ReadOnly).To(BeTrue())
 		})
 
