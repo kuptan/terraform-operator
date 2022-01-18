@@ -6,6 +6,14 @@ data:
   common.tfvars: |-
     length = 20
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: var-files-data1
+data:
+  data.tfvars: |-
+    length = 50
+---
 apiVersion: run.terraform-operator.io/v1alpha1
 kind: Terraform
 metadata:
@@ -22,3 +30,11 @@ spec:
       valueFrom:
         configMap:
           name: var-files-data
+    - key: data-config
+      valueFrom:
+        configMap:
+          name: var-files-data1
+
+  outputs:
+    - key: result
+      moduleOutputName: result
