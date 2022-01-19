@@ -200,7 +200,7 @@ func (t *Terraform) HasErrored() bool {
 }
 
 func (r *Terraform) SetRunId() {
-	r.Status.RunId = fmt.Sprint(random(8))
+	r.Status.RunId = random(8)
 }
 
 func (t *Terraform) PrepareForUpdate() {

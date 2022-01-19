@@ -76,10 +76,12 @@ var _ = Describe("TerraformRun", func() {
 					Generation: 1,
 				},
 				Status: TerraformStatus{
-					RunId:     "1234",
 					RunStatus: RunStarted,
 				},
 			}
+
+			run2.SetRunId()
+			Expect(run2.Status.RunId).To(HaveLen(8))
 
 			By("run is now in a Started state")
 			Expect(run2.IsSubmitted()).To(BeFalse())
@@ -88,6 +90,17 @@ var _ = Describe("TerraformRun", func() {
 			run2.Status.RunStatus = RunRunning
 			By("run is now in a Running state")
 			Expect(run2.IsStarted()).To(BeTrue())
+			Expect(run2.IsRunning()).To(BeTrue())
+
+			run2.Status.RunStatus = RunFailed
+			By("run is now in a Failed state")
+			Expect(run2.HasErrored()).To(BeTrue())
+
+			run2.Status.Generation = run2.Generation
+			run2.Generation = 2
+
+			By("run generation was updated")
+			Expect(run2.IsUpdated()).To(BeTrue())
 
 			run2.Status.RunStatus = RunCompleted
 			By("run is now in a Completed state")
