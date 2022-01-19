@@ -61,8 +61,7 @@ test: manifests generate fmt vet envtest ## Run tests.
 
 .PHONY: test-cov
 test-cov: manifests generate fmt vet envtest ## Run tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -race -coverprofile coverage.txt -covermode=atomic
-
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -race -coverprofile coverage.tmp.txt -covermode=atomic
 
 ##@ Build
 

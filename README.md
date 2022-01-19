@@ -1,5 +1,5 @@
 # Terraform Operator
-[![build](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![build](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml) [![codecov](https://codecov.io/gh/kube-champ/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC)](https://codecov.io/gh/kube-champ/terraform-operator) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 The Terraform Operator provides support to run Terraform modules in Kubernetes in a declaritive way as a [Kubernetes manifest](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/).
 

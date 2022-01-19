@@ -29,10 +29,10 @@ jobs:
         # cat coverage.txt | grep -v "_generated.deepcopy.go" > coverage.txt
         # go tool cover -func coverage.txt
     
-    # - name: Remove Generated Test Files
-    #   run: |
-    #     cat coverage.txt | grep -v "_generated.deepcopy.go" > coverage.txt
-    #     go tool cover -func coverage.txt
+    - name: Exclude Generated
+      run: |
+        cat coverage.tmp.txt | grep -v "_generated.deepcopy.go" > coverage.txt
+        go tool cover -func coverage.txt
 
     # - name: Docker Build
     #   run: docker build -t controller:latest .
