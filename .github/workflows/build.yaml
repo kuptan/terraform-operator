@@ -1,19 +1,12 @@
 name: build
 
 on:
-  pull_request:
-    branches:
-      - main
-      - master
-      - 'releases/**'
-      - 'feature/**'
-      - 'fix/**'
   push:
-      branches:
-        - master
-        - main
-      tags-ignore:
-        - '*.*.*'
+    branches:
+      - master
+      - main
+    tags-ignore:
+      - '*.*.*'
 
 jobs:
   build:
