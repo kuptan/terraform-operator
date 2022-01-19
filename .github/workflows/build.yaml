@@ -2,6 +2,13 @@ name: build
 
 on: ["push", "pull_request"]
 
+# push:
+#     branches:
+#       - master
+#       - main
+#     tags-ignore:
+#       - '*.*.*'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,8 +20,22 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.17
+
     - name: Build
       run: make build
 
     - name: Test
-      run: make docker-build
+      run: make test-cov
+        # cat coverage.txt | grep -v "_generated.deepcopy.go" > coverage.txt
+        # go tool cover -func coverage.txt
+    
+    # - name: Remove Generated Test Files
+    #   run: |
+    #     cat coverage.txt | grep -v "_generated.deepcopy.go" > coverage.txt
+    #     go tool cover -func coverage.txt
+
+    # - name: Docker Build
+    #   run: docker build -t controller:latest .
+
+    - name: Codecov Push
+      run: bash <(curl -s https://codecov.io/bash)
