@@ -66,8 +66,3 @@ func getUniqueResourceName(name string, runId string) string {
 
 	return fmt.Sprintf("%s-%s", truncateResourceName(name, 220), runId)
 }
-
-// returns stars to mask value
-func getMaskedString() string {
-	return "*************"
-}
