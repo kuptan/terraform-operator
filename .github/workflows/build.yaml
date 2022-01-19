@@ -1,13 +1,19 @@
 name: build
 
-on: ["push", "pull_request"]
-
-# push:
-#     branches:
-#       - master
-#       - main
-#     tags-ignore:
-#       - '*.*.*'
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+      - 'releases/**'
+      - 'feature/**'
+      - 'fix/**'
+  push:
+      branches:
+        - master
+        - main
+      tags-ignore:
+        - '*.*.*'
 
 jobs:
   build:
@@ -26,16 +32,15 @@ jobs:
 
     - name: Test
       run: make test-cov
-        # cat coverage.txt | grep -v "_generated.deepcopy.go" > coverage.txt
-        # go tool cover -func coverage.txt
     
     - name: Exclude Generated
       run: |
         cat coverage.tmp.txt | grep -v "_generated.deepcopy.go" > coverage.txt
         go tool cover -func coverage.txt
+        rm coverage.tmp.txt
 
-    # - name: Docker Build
-    #   run: docker build -t controller:latest .
+    - name: Docker Build
+      run: docker build -t controller:latest .
 
     - name: Codecov Push
       run: bash <(curl -s https://codecov.io/bash)
