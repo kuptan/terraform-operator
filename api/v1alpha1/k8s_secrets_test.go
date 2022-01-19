@@ -42,7 +42,7 @@ var _ = Describe("Kubernetes Secrets", func() {
 			},
 		}
 
-		It("should create the configmap successfully", func() {
+		It("should create the secret successfully", func() {
 			secret, err := createSecretForOutputs(key, run)
 
 			expectedName := "bar-1234"
@@ -50,6 +50,32 @@ var _ = Describe("Kubernetes Secrets", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(secret).ToNot(BeNil())
 			Expect(secret.Name).To(Equal(expectedName))
+		})
+
+		It("should fail to create a secret that already exist", func() {
+			secret, err := createSecretForOutputs(key, run)
+
+			Expect(err).To(HaveOccurred())
+			Expect(secret).To(BeNil())
+		})
+
+		It("should get the secret by id successfully", func() {
+			secret, err := run.GetSecretById(key)
+
+			expectedName := "bar-1234"
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(secret).ToNot(BeNil())
+			Expect(secret.Name).To(Equal(expectedName))
+		})
+
+		It("should fail to find a secret that does not exist", func() {
+			key.Name = "new-secret"
+
+			secret, err := run.GetSecretById(key)
+
+			Expect(err).To(HaveOccurred())
+			Expect(secret).To(BeNil())
 		})
 	})
 })
