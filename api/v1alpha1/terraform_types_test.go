@@ -3,8 +3,11 @@ package v1alpha1
 import (
 	"context"
 
+	"github.com/kube-champ/terraform-operator/pkg/kube"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -18,14 +21,14 @@ var _ = Describe("TerraformRun", func() {
 		// Add any teardown steps that needs to be executed after each test
 	})
 
-	key := types.NamespacedName{
-		Name:      "foo",
-		Namespace: "default",
-	}
-
-	var created, fetched *Terraform
-
 	Context("Create run", func() {
+		var created, fetched *Terraform
+
+		key := types.NamespacedName{
+			Name:      "foo",
+			Namespace: "default",
+		}
+
 		It("should create a Terraform Object", func() {
 			created = &Terraform{
 				ObjectMeta: metav1.ObjectMeta{
@@ -147,6 +150,122 @@ var _ = Describe("TerraformRun", func() {
 			Expect(run.Status.PreviousRuns).To(HaveLen(1))
 			Expect(run.Status.PreviousRuns[0].RunId).To(Equal("1234"))
 			Expect(run.Status.PreviousRuns[0].Status).To(Equal(RunCompleted))
+		})
+	})
+
+	Context("Run Errors", func() {
+		key := types.NamespacedName{
+			Name:      "barbar",
+			Namespace: "default",
+		}
+
+		run := &Terraform{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "barbar",
+				Namespace: "default",
+			},
+			Spec: TerraformSpec{
+				TerraformVersion: "1.0.2",
+				Module: Module{
+					Source:  "IbraheemAlSaady/test/module",
+					Version: "0.0.1",
+				},
+				Variables: []Variable{
+					Variable{
+						Key:   "length",
+						Value: "16",
+					},
+				},
+				Destroy:             false,
+				DeleteCompletedJobs: false,
+			},
+			Status: TerraformStatus{
+				RunId: "1234",
+			},
+		}
+
+		name := getUniqueResourceName(run.Name, run.Status.RunId)
+
+		It("should fail to create a run due to existing configmap", func() {
+			cfg := corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      name,
+					Namespace: "default",
+				},
+				Data: make(map[string]string),
+			}
+
+			kube.ClientSet.CoreV1().ConfigMaps("default").Create(context.Background(), &cfg, metav1.CreateOptions{})
+
+			job, err := run.CreateTerraformRun(key)
+
+			Expect(err).To(HaveOccurred())
+			Expect(job).To(BeNil())
+
+			kube.ClientSet.CoreV1().ConfigMaps("default").Delete(context.Background(), name, metav1.DeleteOptions{})
+		})
+
+		It("should fail to create a run due to existing secret", func() {
+			secret := corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      name,
+					Namespace: "default",
+				},
+				Data: make(map[string][]byte),
+			}
+
+			kube.ClientSet.CoreV1().Secrets("default").Create(context.Background(), &secret, metav1.CreateOptions{})
+
+			job, err := run.CreateTerraformRun(key)
+
+			Expect(err).To(HaveOccurred())
+			Expect(job).To(BeNil())
+
+			kube.ClientSet.CoreV1().Secrets("default").Delete(context.Background(), name, metav1.DeleteOptions{})
+		})
+
+		It("should fail to create a run due to existing job", func() {
+			j := batchv1.Job{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      name,
+					Namespace: "default",
+				},
+				Spec: batchv1.JobSpec{
+					Template: corev1.PodTemplateSpec{
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								corev1.Container{
+									Name:  "busybox",
+									Image: "busybox",
+								},
+							},
+							RestartPolicy: corev1.RestartPolicyNever,
+						},
+					},
+				},
+			}
+
+			kube.ClientSet.BatchV1().Jobs("default").Create(context.Background(), &j, metav1.CreateOptions{})
+
+			job, err := run.CreateTerraformRun(key)
+
+			Expect(err).To(HaveOccurred())
+			Expect(job).To(BeNil())
+
+			kube.ClientSet.BatchV1().Jobs("default").Delete(context.Background(), name, metav1.DeleteOptions{})
+		})
+
+		It("should return error if the job does not exist", func() {
+			job, err := run.GetJobByRun()
+
+			Expect(err).To(HaveOccurred())
+			Expect(job).To(BeNil())
+		})
+
+		It("should fail to delete a job that does not exist", func() {
+			err := run.DeleteAfterCompletion()
+
+			Expect(err).To(HaveOccurred())
 		})
 	})
 })
