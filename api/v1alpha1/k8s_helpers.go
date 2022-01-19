@@ -72,19 +72,3 @@ func getEnvVariableFromFieldSelector(name string, path string) corev1.EnvVar {
 		},
 	}
 }
-
-func getInitContainer(name string, image string, mounts []corev1.VolumeMount, cmd string) corev1.Container {
-	commands := []string{
-		"/bin/sh",
-		"-c",
-	}
-
-	commands = append(commands, cmd)
-
-	return corev1.Container{
-		Name:         name,
-		Image:        image,
-		VolumeMounts: mounts,
-		Command:      commands,
-	}
-}
