@@ -36,6 +36,7 @@ Chart can be found [here](https://github.com/kube-champ/helm-charts/tree/master/
 ``` -->
 
 ## Usage
+For more examples on how to use this CRD, check the [samples](./config/samples/README.md)
 
 ```yaml
 apiVersion: run.terraform-operator.io/v1alpha1
@@ -83,9 +84,15 @@ spec:
         ## can be 'secret'
         configMap:
           name: "terraform-env-config"
+  
+  ## ssh key from a secret to allow pull modules from private git repos
+  gitSSHKey:
+    valueFrom:
+      ....
 
   ## outputs defined will be stored in a Kubernetes secret
   outputs:
+      ## The Kubernetes Secret key
     - key: my_new_output_name
       ## the output name from the module
       moduleOutputName: result
@@ -100,4 +107,10 @@ spec:
   retryLimit: 2
 ```
 
-For more examples on how to use this CRD, check the [samples](./config/samples/README.md)
+## Roadmap
+Check the [Terraform Operator Project](https://github.com/orgs/kube-champ/projects/1) to see what's on the roadmap
+
+## Contributing
+This project welcomes contributions and suggestions. For instructions about setting up your environment to develop and extend the operator, please see [contributing.md](./docs/contributing.md)
+
+When you submit a pull request, the pull request has to be signed
