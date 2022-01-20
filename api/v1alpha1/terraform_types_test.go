@@ -32,8 +32,8 @@ var _ = Describe("TerraformRun", func() {
 		It("should create a Terraform Object", func() {
 			created = &Terraform{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
+					Name:      key.Name,
+					Namespace: key.Namespace,
 				},
 				Spec: TerraformSpec{
 					TerraformVersion: "1.0.2",
@@ -161,8 +161,8 @@ var _ = Describe("TerraformRun", func() {
 
 		run := &Terraform{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "barbar",
-				Namespace: "default",
+				Name:      key.Name,
+				Namespace: key.Namespace,
 			},
 			Spec: TerraformSpec{
 				TerraformVersion: "1.0.2",
