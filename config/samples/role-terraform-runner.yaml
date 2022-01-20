@@ -1,9 +1,9 @@
-# apiVersion: v1
-# kind: ServiceAccount
-# metadata:
-#   name: terraform-runner
-#   namespace: default
-# ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: terraform-runner
+  namespace: default
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -13,16 +13,16 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   verbs: ["get", "update"]
-# ---
-# apiVersion: rbac.authorization.k8s.io/v1
-# kind: ClusterRoleBinding
-# metadata:
-#   name: terraform-runner
-# subjects:
-# - kind: ServiceAccount
-#   name: terraform-runner # name of your service account
-#   namespace: default # this is the namespace your service account is in
-# roleRef: # referring to your ClusterRole
-#   kind: ClusterRole
-#   name: terraform-runner
-#   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: terraform-runner
+subjects:
+- kind: ServiceAccount
+  name: terraform-runner # name of your service account
+  namespace: default # this is the namespace your service account is in
+roleRef: # referring to your ClusterRole
+  kind: ClusterRole
+  name: terraform-runner
+  apiGroup: rbac.authorization.k8s.io

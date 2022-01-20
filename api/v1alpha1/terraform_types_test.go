@@ -105,6 +105,10 @@ var _ = Describe("TerraformRun", func() {
 			By("run generation was updated")
 			Expect(run2.IsUpdated()).To(BeTrue())
 
+			run2.Status.RunStatus = RunWaitingForDependency
+			By("run is now in a waiting state")
+			Expect(run2.IsWaiting()).To(BeTrue())
+
 			run2.Status.RunStatus = RunCompleted
 			By("run is now in a Completed state")
 			Expect(run2.IsStarted()).To(BeFalse())

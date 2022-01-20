@@ -1,0 +1,40 @@
+apiVersion: run.terraform-operator.io/v1alpha1
+kind: Terraform
+metadata:
+  name: terraform-run1
+spec:
+  terraformVersion: 1.0.2
+
+  module:
+    source: IbraheemAlSaady/test/module
+    version: 0.0.2
+
+  variables:
+    - key: length
+      value: "16"
+
+  outputs:
+    - key: result
+      moduleOutputName: result
+---
+apiVersion: run.terraform-operator.io/v1alpha1
+kind: Terraform
+metadata:
+  name: terraform-run2
+spec:
+  terraformVersion: 1.0.2
+
+  module:
+    source: IbraheemAlSaady/test/module
+    version: 0.0.2
+
+  dependsOn:
+    - name: terraform-run1
+
+  variables:
+    - key: length
+      value: "16"
+
+  outputs:
+    - key: result
+      moduleOutputName: result

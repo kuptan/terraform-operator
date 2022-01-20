@@ -16,7 +16,14 @@ spec:
     singular: terraform
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.runStatus
+      name: State
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Terraform is the Schema for the terraforms API
@@ -46,7 +53,17 @@ spec:
               dependsOn:
                 description: dependencies on other modules
                 items:
-                  type: string
+                  description: DependsOnSpec specifies the dependency on other runs
+                  properties:
+                    name:
+                      description: The terraform metadata.name
+                      type: string
+                    namespace:
+                      description: Namespace where the Terraform run exist
+                      type: string
+                  required:
+                  - name
+                  type: object
                 type: array
               destroy:
                 description: Indicates whether a destroy job should run
