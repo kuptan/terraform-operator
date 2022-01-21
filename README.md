@@ -2,19 +2,19 @@
 <p align="center"><img src="docs/img/tfo.svg" width="260"></p>
 
 <p align="center">
-  <a href="https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master">
+  <a href="https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml">
     <img src="https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master" alt="build">
   </a>
   
-  <a href="https://codecov.io/gh/kube-champ/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC">
+  <a href="https://codecov.io/gh/kube-champ/terraform-operator">
     <img src="https://codecov.io/gh/kube-champ/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC" alt="codecov">
   </a>
 
-   <a href="https://goreportcard.com/badge/github.com/kube-champ/terraform-operator">
+   <a href="https://goreportcard.com/report/github.com/kube-champ/terraform-operator">
     <img src="https://goreportcard.com/badge/github.com/kube-champ/terraform-operator" alt="go report">
   </a>
 
-   <a href="https://img.shields.io/badge/License-Apache_2.0-blue.svg">
+   <a href="https://opensource.org/licenses/Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="license">
   </a>
 </p>
