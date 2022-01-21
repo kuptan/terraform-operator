@@ -295,14 +295,14 @@ func (t *Terraform) DependenciesCompleted() (bool, error) {
 		return true, nil
 	}
 
-	for _, dep := range t.Spec.DependsOn {
+	for _, d := range t.Spec.DependsOn {
 		ns := t.Namespace
 
-		if dep.Namespace != "" {
-			ns = dep.Namespace
+		if d.Namespace != "" {
+			ns = d.Namespace
 		}
 
-		tfDep, err := terraformKubeClient.Terraforms(ns).Get(context.Background(), dep.Name, metav1.GetOptions{})
+		dep, err := terraformKubeClient.Terraforms(ns).Get(context.Background(), d.Name, metav1.GetOptions{})
 
 		if err != nil {
 			if errors.IsNotFound(err) {
@@ -312,7 +312,7 @@ func (t *Terraform) DependenciesCompleted() (bool, error) {
 			return false, err
 		}
 
-		if tfDep.Status.RunStatus != RunCompleted {
+		if dep.Status.RunStatus != RunCompleted {
 			return false, nil
 		}
 	}

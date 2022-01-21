@@ -80,6 +80,10 @@ var _ = BeforeSuite(func() {
 	Expect(k8sClient).NotTo(BeNil())
 
 	kube.ClientSet = fake.NewSimpleClientset()
+	_, err = NewForConfig(cfg)
+
+	Expect(err).ToNot(HaveOccurred())
+
 	utils.LoadEnv()
 }, 60)
 

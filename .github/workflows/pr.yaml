@@ -8,6 +8,13 @@ on:
       - 'releases/**'
       - 'feature/**'
       - 'fix/**'
+  push:
+    branches-ignore:
+      - master
+      - main
+      - 'releases/**'
+    tags-ignore:
+      - '*.*.*'
 
 jobs:
   build:

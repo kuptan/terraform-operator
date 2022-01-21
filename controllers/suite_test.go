@@ -98,6 +98,9 @@ var _ = BeforeSuite(func() {
 	kube.ClientSet = fake.NewSimpleClientset()
 	utils.LoadEnv()
 
+	_, err = v1alpha1.NewForConfig(cfg)
+	Expect(err).NotTo(HaveOccurred())
+
 	Expect(err).NotTo(HaveOccurred(), "failed to setup controller in test")
 
 	err = prepareRunnerRBAC()
