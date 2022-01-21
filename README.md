@@ -1,5 +1,23 @@
 # Terraform Operator
-[![build](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml) [![codecov](https://codecov.io/gh/kube-champ/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC)](https://codecov.io/gh/kube-champ/terraform-operator) [![Go Report Card](https://goreportcard.com/badge/github.com/kube-champ/terraform-operator)](https://goreportcard.com/report/github.com/kube-champ/terraform-operator) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+<p align="center"><img src="docs/img/tfo.svg" width="260"></p>
+
+<p align="center">
+  <a href="https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master">
+    <img src="https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master" alt="build">
+  </a>
+  
+  <a href="https://codecov.io/gh/kube-champ/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC">
+    <img src="https://codecov.io/gh/kube-champ/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC" alt="codecov">
+  </a>
+
+   <a href="https://goreportcard.com/badge/github.com/kube-champ/terraform-operator">
+    <img src="https://goreportcard.com/badge/github.com/kube-champ/terraform-operator" alt="go report">
+  </a>
+
+   <a href="https://img.shields.io/badge/License-Apache_2.0-blue.svg">
+    <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="license">
+  </a>
+</p>
 
 The Terraform Operator provides support to run Terraform modules in Kubernetes in a declaritive way as a [Kubernetes manifest](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/).
 
@@ -116,6 +134,10 @@ spec:
 Check the [Terraform Operator Project](https://github.com/orgs/kube-champ/projects/1) to see what's on the roadmap
 
 ## Contributing
-This project welcomes contributions and suggestions. For instructions about setting up your environment to develop and extend the operator, please see [contributing.md](./docs/contributing.md)
+If you find this project useful, help us:
 
-When you submit a pull request, the pull request has to be signed
+- Support the development of this project and star this repo! :star:
+- Help new users with issues they may encounter :muscle:
+- Send a pull request with your new features and bug fixes :rocket: 
+
+For instructions about setting up your environment to develop and extend the operator, please see [contributing.md](./docs/contributing.md)
