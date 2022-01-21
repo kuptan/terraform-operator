@@ -12,7 +12,7 @@ import (
 type terraformInterface interface {
 	List(ctx context.Context, opts metav1.ListOptions) (*TerraformList, error)
 	Get(ctx context.Context, name string, options metav1.GetOptions) (*Terraform, error)
-	Create(ctx context.Context, run *Terraform) (*Terraform, error)
+	Create(ctx context.Context, run *Terraform, options metav1.CreateOptions) (*Terraform, error)
 	Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error)
 }
 
@@ -89,13 +89,14 @@ func (c *terraformClient) Get(ctx context.Context, name string, opts metav1.GetO
 	return &result, err
 }
 
-func (c *terraformClient) Create(ctx context.Context, run *Terraform) (*Terraform, error) {
+func (c *terraformClient) Create(ctx context.Context, run *Terraform, opts metav1.CreateOptions) (*Terraform, error) {
 	result := Terraform{}
 
 	err := c.restClient.
 		Post().
 		Namespace(c.ns).
 		Resource(k8sResourceName).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(run).
 		Do(ctx).
 		Into(&result)
