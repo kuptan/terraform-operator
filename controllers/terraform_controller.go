@@ -68,8 +68,6 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if run.IsSubmitted() || run.IsWaiting() {
-		r.Log.Info("initializing a terraform run")
-
 		requeue, err := r.create(run, req.NamespacedName)
 
 		if err != nil {

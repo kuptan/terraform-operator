@@ -76,7 +76,7 @@ type DependsOnSpec struct {
 	Name string `json:"name"`
 	// Namespace where the Terraform run exist
 	// +optional
-	Namespace string `json:"namespace"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // GitSSHKey config
