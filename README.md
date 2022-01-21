@@ -81,9 +81,14 @@ spec:
   variableFiles:
     - key: terraform-env-config
       valueFrom:
-        ## can be 'secret'
+        ## can also be 'secret'
         configMap:
           name: "terraform-env-config"
+
+  dependsOn:
+    - name: run-base
+      ## if its in another namespace
+      namespace:
   
   ## ssh key from a secret to allow pull modules from private git repos
   gitSSHKey:

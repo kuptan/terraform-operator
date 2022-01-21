@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
@@ -159,8 +158,6 @@ var _ = Describe("Terraform Controller", func() {
 				r := &v1alpha1.Terraform{}
 				k8sClient.Get(context.Background(), key, r)
 
-				fmt.Printf(" -----this is a name %s with run id %s -----", r.Name, r.Status.RunId)
-
 				makeRunJobSucceed(r)
 
 				return r.Status.RunStatus
@@ -189,6 +186,104 @@ var _ = Describe("Terraform Controller", func() {
 				r := &v1alpha1.Terraform{}
 				return k8sClient.Get(context.Background(), key, r)
 			}, timeout, interval).ShouldNot(Succeed())
+		})
+	})
+
+	Context("Terraform Run Dependencies", func() {
+		run1Key := types.NamespacedName{
+			Name:      "run-dep1",
+			Namespace: "default",
+		}
+
+		run2Key := types.NamespacedName{
+			Name:      "run-dep2",
+			Namespace: "default",
+		}
+
+		run1 := &v1alpha1.Terraform{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      run1Key.Name,
+				Namespace: run1Key.Namespace,
+			},
+			Spec: v1alpha1.TerraformSpec{
+				TerraformVersion: "1.0.2",
+				Module: v1alpha1.Module{
+					Source:  "IbraheemAlSaady/test/module",
+					Version: "0.0.1",
+				},
+			},
+		}
+
+		run2 := &v1alpha1.Terraform{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      run2Key.Name,
+				Namespace: run2Key.Namespace,
+			},
+			Spec: v1alpha1.TerraformSpec{
+				TerraformVersion: "1.0.2",
+				Module: v1alpha1.Module{
+					Source:  "IbraheemAlSaady/test/module",
+					Version: "0.0.1",
+				},
+				DependsOn: []*v1alpha1.DependsOnSpec{
+					&v1alpha1.DependsOnSpec{
+						Name:      run1Key.Name,
+						Namespace: run1Key.Namespace,
+					},
+				},
+			},
+		}
+
+		It("Should create runs successfully with the correct dependency flow", func() {
+			// Create
+			Expect(k8sClient.Create(context.Background(), run1)).Should(Succeed())
+
+			By("evaluating run1 runId")
+			Eventually(func() string {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run1Key, r)
+
+				return r.Status.RunId
+			}, timeout, interval).ShouldNot(BeEmpty())
+
+			// Create
+			Expect(k8sClient.Create(context.Background(), run2)).Should(Succeed())
+
+			By("evaluating run2 status")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run2Key, r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunWaitingForDependency))
+
+			By("expect run1 status to be completed")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run1Key, r)
+
+				makeRunJobSucceed(r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
+
+			By("evaluating run2 runId")
+			Eventually(func() string {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run2Key, r)
+
+				return r.Status.RunId
+			}, timeout, interval).ShouldNot(BeEmpty())
+
+			By("expect run2 status to be completed")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run2Key, r)
+
+				makeRunJobSucceed(r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
 		})
 	})
 })

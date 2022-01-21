@@ -17,10 +17,12 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -68,6 +70,15 @@ type OutputSpec struct {
 	ModuleOutputName string `json:"moduleOutputName"`
 }
 
+// DependsOnSpec specifies the dependency on other runs
+type DependsOnSpec struct {
+	// The terraform metadata.name
+	Name string `json:"name"`
+	// Namespace where the Terraform run exist
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
+}
+
 // GitSSHKey config
 type GitSSHKeySpec struct {
 	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
@@ -76,11 +87,12 @@ type GitSSHKeySpec struct {
 type TerraformRunStatus string
 
 const (
-	RunStarted   TerraformRunStatus = "Started"
-	RunRunning   TerraformRunStatus = "Running"
-	RunCompleted TerraformRunStatus = "Completed"
-	RunDestroyed TerraformRunStatus = "Destroyed"
-	RunFailed    TerraformRunStatus = "Failed"
+	RunStarted              TerraformRunStatus = "Started"
+	RunRunning              TerraformRunStatus = "Running"
+	RunCompleted            TerraformRunStatus = "Completed"
+	RunDestroyed            TerraformRunStatus = "Destroyed"
+	RunFailed               TerraformRunStatus = "Failed"
+	RunWaitingForDependency TerraformRunStatus = "WaitingForDependency"
 )
 
 // PreviousRuns stores the previous run information in case the current run object was modified
@@ -113,7 +125,7 @@ type TerraformSpec struct {
 	Workspace string `json:"workspace,omitempty"`
 	// dependencies on other modules
 	// +optional
-	DependsOn []string `json:"dependsOn,omitempty"`
+	DependsOn []*DependsOnSpec `json:"dependsOn,omitempty"`
 	// Variables as inputs to module
 	// +optional
 	Variables []Variable `json:"variables,omitempty"`
@@ -153,6 +165,8 @@ type TerraformStatus struct {
 //+kubebuilder:subresource:status
 
 // Terraform is the Schema for the terraforms API
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.runStatus"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 type Terraform struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -193,6 +207,11 @@ func (t *Terraform) IsRunning() bool {
 // check if the object was updated
 func (t *Terraform) IsUpdated() bool {
 	return t.Generation > 0 && t.Generation > t.Status.Generation
+}
+
+// check if the run is waiting
+func (t *Terraform) IsWaiting() bool {
+	return t.Status.RunStatus == RunWaitingForDependency
 }
 
 func (t *Terraform) HasErrored() bool {
@@ -269,6 +288,36 @@ func (t *Terraform) GetJobByRun() (*batchv1.Job, error) {
 	}
 
 	return job, err
+}
+
+func (t *Terraform) DependenciesCompleted() (bool, error) {
+	if len(t.Spec.DependsOn) == 0 {
+		return true, nil
+	}
+
+	for _, d := range t.Spec.DependsOn {
+		ns := t.Namespace
+
+		if d.Namespace != "" {
+			ns = d.Namespace
+		}
+
+		dep, err := terraformKubeClient.Terraforms(ns).Get(context.Background(), d.Name, metav1.GetOptions{})
+
+		if err != nil {
+			if errors.IsNotFound(err) {
+				return false, nil
+			}
+
+			return false, err
+		}
+
+		if dep.Status.RunStatus != RunCompleted {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
 
 func init() {

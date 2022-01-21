@@ -31,7 +31,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	terraformClient "github.com/kube-champ/terraform-operator/api/client"
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
 	"github.com/kube-champ/terraform-operator/controllers"
 	"github.com/kube-champ/terraform-operator/pkg/kube"
@@ -109,7 +108,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if _, err := terraformClient.NewForConfig(cfg); err != nil {
+	if _, err := v1alpha1.NewForConfig(cfg); err != nil {
 		setupLog.Error(err, "could not create Kubernetes rest client for resource Run")
 		os.Exit(1)
 	}

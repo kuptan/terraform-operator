@@ -67,11 +67,15 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	if run.IsSubmitted() {
-		r.Log.Info("initializing a terraform run")
+	if run.IsSubmitted() || run.IsWaiting() {
+		requeue, err := r.create(run, req.NamespacedName)
 
-		if err := r.create(run, req.NamespacedName); err != nil {
+		if err != nil {
 			return ctrl.Result{}, err
+		}
+
+		if requeue {
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
 
 		r.Recorder.Event(run, "Normal", "Created", fmt.Sprintf("Run(%s) submitted", run.Status.RunId))
@@ -96,8 +100,14 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if run.IsUpdated() {
 		r.Log.Info("updating a terraform run")
 
-		if err := r.update(run, req.NamespacedName); err != nil {
+		requeue, err := r.update(run, req.NamespacedName)
+
+		if err != nil {
 			return ctrl.Result{}, err
+		}
+
+		if requeue {
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
 
 		return ctrl.Result{}, nil
