@@ -21,11 +21,11 @@
 
 The Terraform Operator provides support to run Terraform modules in Kubernetes in a declaritive way as a [Kubernetes manifest](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/).
 
-This projects makes running a Terraform module, Kubernetes native through a single Kubernetes [CRD](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/). You can run the manifest with kubectl, Terraform, GitOps tools, etc...
+This project makes running a Terraform module, Kubernetes native through a single Kubernetes [CRD](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/). You can run the manifest with kubectl, Terraform, GitOps tools, etc...
 
 **Disclaimer**
 
-This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works, have a look at the [design doc](./docs/design.md)
+This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works, have a look at the [design doc](https://kube-champ.github.io/terraform-operator/design/)
 
 ## Installation
 
@@ -45,16 +45,11 @@ Chart can be found [here](https://github.com/kube-champ/helm-charts/tree/master/
   kubectl apply -k https://github.com/kube-champ/terraform-operator/config/manifest
 ```
 
-<!-- **Kubernetes Manifest**
-
-```bash
-  install crds
-  install role
-  install deployment
-``` -->
+## Docuemntation
+For docuemntation, check our page [here](https://kube-champ.github.io/terraform-operator/)
 
 ## Usage
-For more examples on how to use this CRD, check the [samples](./config/samples/README.md)
+For more examples on how to use this CRD, check the [samples](https://kube-champ.github.io/terraform-operator/examples/)
 
 ```yaml
 apiVersion: run.terraform-operator.io/v1alpha1
@@ -140,4 +135,4 @@ If you find this project useful, help us:
 - Help new users with issues they may encounter :muscle:
 - Send a pull request with your new features and bug fixes :rocket: 
 
-For instructions about setting up your environment to develop and extend the operator, please see [contributing.md](./docs/contributing.md)
+For instructions about setting up your environment to develop and extend the operator, please see [contributing.md](https://kube-champ.github.io/terraform-operator/contributing-guide/)

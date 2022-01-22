@@ -1,4 +1,10 @@
-# Requirements 
+---
+layout: default
+title: Contributing Guide
+nav_order: 7
+---
+
+# Contributing Guide
 If you're interested in contributing to this project, you'll need:
 
 * Go installed - see this [Getting Started](https://golang.org/doc/install) guide for Go.
@@ -18,6 +24,7 @@ If you're not familiar with how this controller works under the hood, its highly
 
 1. Clone the repositorry and open the project in a code editor (e.g: visual studio code)
 2. In the root directory, create a `.env` file with the following environment variables
+
 ```bash
 export DOCKER_REGISTRY=docker.io
 export TERRAFORM_RUNNER_IMAGE=kubechamp/terraform-runner
@@ -26,9 +33,11 @@ export TERRAFORM_RUNNER_IMAGE=kubechamp/terraform-runner
 export TERRAFORM_RUNNER_IMAGE_TAG=0.0.3 # <-- might be a higher version
 export KNOWN_HOSTS_CONFIGMAP_NAME=terraform-operator-known-hosts
 ```
+
 3. Source the .env with `source .env`
 4. Once you have a Kubernetes cluster running, create a `kubeconfig` file in the root of the project with the config of the Kubernetes cluster
 5. Create the following Kubernetes RBAC objects, this is needed by the `terraform-runner` due to writing outputs to a Kubernetes secret
+
 ```yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -59,7 +68,9 @@ roleRef: # referring to your ClusterRole
   name: terraform-runner
   apiGroup: rbac.authorization.k8s.io
 ```
+
 6. If you're testing with private git repos, you need to create the known hosts config map
+
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -77,6 +88,7 @@ data:
     ssh.dev.azure.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
     vs-ssh.visualstudio.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
 ```
+
 7. Install the manifests above and install the CRD. See [Dependencies](#dependencies)
 
 # Building and Running the operator

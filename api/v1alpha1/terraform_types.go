@@ -31,7 +31,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 type Module struct {
-	// the module source
+	// module source, must be a valid Terraform module source
 	Source string `json:"source"`
 	// module version
 	// +optional
@@ -39,20 +39,20 @@ type Module struct {
 }
 
 type VariableFile struct {
-	// Variable name
+	// The module variable name
 	Key string `json:"key"`
 
-	// Source for the variable's value. Cannot be used if value is not empty.
+	// The source of the variable file
 	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
 }
 
 type Variable struct {
-	// Variable name
+	// Terraform module variable name
 	Key string `json:"key"`
 	// Variable value
 	// +optional
 	Value string `json:"value"`
-	// Source for the variable's value. Cannot be used if value is not empty.
+	// The variable value from a key source (secret or configmap)
 	// +optional
 	ValueFrom *corev1.EnvVarSource `json:"valueFrom,omitempty"`
 	// EnvironmentVariable denotes if this variable should be created as environment variable
@@ -60,27 +60,26 @@ type Variable struct {
 	EnvironmentVariable bool `json:"environmentVariable,omitempty"`
 }
 
-// OutputSpec specifies which values need to be output
 type OutputSpec struct {
-	// Output name
+	// Output key specifies the Kubernetes secret key
 	// +optional
 	Key string `json:"key"`
-	// Attribute name in module
+	// The output name as defined in the source Terraform module
 	// +optional
 	ModuleOutputName string `json:"moduleOutputName"`
 }
 
-// DependsOnSpec specifies the dependency on other runs
+// DependsOnSpec specifies the dependency on other Terraform runs
 type DependsOnSpec struct {
-	// The terraform metadata.name
+	// The Terraform object metadata.name
 	Name string `json:"name"`
-	// Namespace where the Terraform run exist
+	// The namespace where the Terraform run exist 
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 }
 
-// GitSSHKey config
 type GitSSHKeySpec struct {
+	// The source of the value where the private SSH key exist
 	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
 }
 
@@ -110,41 +109,41 @@ type TerraformSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Terraform. Edit terraform_types.go to remove/update
+	// The terraform version to use
 	TerraformVersion string `json:"terraformVersion"`
-	// The module information to be provided
+	// The module information (source & version) 
 	Module Module `json:"module"`
-	// A custom terrafor backend configuration
+	// A custom terraform backend configuration
 	// +optional
 	Backend string `json:"backend,omitempty"`
-	// A custom terrafor providers configuration
+	// A custom terraform providers configuration
 	// +optional
 	ProvidersConfig string `json:"providersConfig,omitempty"`
-	// The terraform workspae
+	// The terraform workspae. Defaults to `default`
 	// +optional
 	Workspace string `json:"workspace,omitempty"`
-	// dependencies on other modules
+	// A list of dependencies on other Terraform runs
 	// +optional
 	DependsOn []*DependsOnSpec `json:"dependsOn,omitempty"`
-	// Variables as inputs to module
+	// Variables as inputs to the Terraform module
 	// +optional
 	Variables []Variable `json:"variables,omitempty"`
-	// Variables as inputs to module
+	// Terraform variable files
 	// +optional
 	VariableFiles []VariableFile `json:"variableFiles,omitempty"`
-	// Outputs denote outputs wanted
+	// Terraform outputs will be written to a Kubernetes secret
 	// +optional
 	Outputs []*OutputSpec `json:"outputs,omitempty"`
 	// Indicates whether a destroy job should run
 	// +optional
 	Destroy bool `json:"destroy,omitempty"`
-	// Indicates whether to keep the jobs/pods after the run is successful
+	// Indicates whether to keep the jobs/pods after the run is successful/completed
 	// +optional
 	DeleteCompletedJobs bool `json:"deleteCompletedJobs,omitempty"`
 	// A retry limit to be set on the Job as a backOffLimit
 	// +optional
 	RetryLimit int32 `json:"retryLimit,omitempty"`
-	// An SSH key to be able to run terraform on private git repositories
+	// An SSH key to be able to pull modules from private git repositories
 	// +optional
 	GitSSHKey *GitSSHKeySpec `json:"gitSSHKey,omitempty"`
 }
