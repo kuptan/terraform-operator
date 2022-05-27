@@ -32,8 +32,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/kube-champ/terraform-operator/pkg/kube"
-	"github.com/kube-champ/terraform-operator/pkg/utils"
+	"github.com/kube-champ/terraform-operator/internal/kube"
+	"github.com/kube-champ/terraform-operator/internal/utils"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -80,9 +80,6 @@ var _ = BeforeSuite(func() {
 	Expect(k8sClient).NotTo(BeNil())
 
 	kube.ClientSet = fake.NewSimpleClientset()
-	_, err = NewForConfig(cfg)
-
-	Expect(err).ToNot(HaveOccurred())
 
 	utils.LoadEnv()
 }, 60)

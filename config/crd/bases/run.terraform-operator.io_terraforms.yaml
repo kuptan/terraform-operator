@@ -44,22 +44,23 @@ spec:
             description: TerraformSpec defines the desired state of Terraform
             properties:
               backend:
-                description: A custom terrafor backend configuration
+                description: A custom terraform backend configuration
                 type: string
               deleteCompletedJobs:
                 description: Indicates whether to keep the jobs/pods after the run
-                  is successful
+                  is successful/completed
                 type: boolean
               dependsOn:
-                description: dependencies on other modules
+                description: A list of dependencies on other Terraform runs
                 items:
-                  description: DependsOnSpec specifies the dependency on other runs
+                  description: DependsOnSpec specifies the dependency on other Terraform
+                    runs
                   properties:
                     name:
-                      description: The terraform metadata.name
+                      description: The Terraform object metadata.name
                       type: string
                     namespace:
-                      description: Namespace where the Terraform run exist
+                      description: The namespace where the Terraform run exist
                       type: string
                   required:
                   - name
@@ -69,12 +70,12 @@ spec:
                 description: Indicates whether a destroy job should run
                 type: boolean
               gitSSHKey:
-                description: An SSH key to be able to run terraform on private git
+                description: An SSH key to be able to pull modules from private git
                   repositories
                 properties:
                   valueFrom:
-                    description: Represents the source of a volume to mount. Only
-                      one of its members may be specified.
+                    description: The source of the value where the private SSH key
+                      exist
                     properties:
                       awsElasticBlockStore:
                         description: 'AWSElasticBlockStore represents an AWS Disk
@@ -1566,10 +1567,10 @@ spec:
                 - valueFrom
                 type: object
               module:
-                description: The module information to be provided
+                description: The module information (source & version)
                 properties:
                   source:
-                    description: the module source
+                    description: module source, must be a valid Terraform module source
                     type: string
                   version:
                     description: module version
@@ -1578,39 +1579,37 @@ spec:
                 - source
                 type: object
               outputs:
-                description: Outputs denote outputs wanted
+                description: Terraform outputs will be written to a Kubernetes secret
                 items:
-                  description: OutputSpec specifies which values need to be output
                   properties:
                     key:
-                      description: Output name
+                      description: Output key specifies the Kubernetes secret key
                       type: string
                     moduleOutputName:
-                      description: Attribute name in module
+                      description: The output name as defined in the source Terraform
+                        module
                       type: string
                   type: object
                 type: array
               providersConfig:
-                description: A custom terrafor providers configuration
+                description: A custom terraform providers configuration
                 type: string
               retryLimit:
                 description: A retry limit to be set on the Job as a backOffLimit
                 format: int32
                 type: integer
               terraformVersion:
-                description: Foo is an example field of Terraform. Edit terraform_types.go
-                  to remove/update
+                description: The terraform version to use
                 type: string
               variableFiles:
-                description: Variables as inputs to module
+                description: Terraform variable files
                 items:
                   properties:
                     key:
-                      description: Variable name
+                      description: The module variable name
                       type: string
                     valueFrom:
-                      description: Source for the variable's value. Cannot be used
-                        if value is not empty.
+                      description: The source of the variable file
                       properties:
                         awsElasticBlockStore:
                           description: 'AWSElasticBlockStore represents an AWS Disk
@@ -3137,7 +3136,7 @@ spec:
                   type: object
                 type: array
               variables:
-                description: Variables as inputs to module
+                description: Variables as inputs to the Terraform module
                 items:
                   properties:
                     environmentVariable:
@@ -3145,14 +3144,14 @@ spec:
                         be created as environment variable
                       type: boolean
                     key:
-                      description: Variable name
+                      description: Terraform module variable name
                       type: string
                     value:
                       description: Variable value
                       type: string
                     valueFrom:
-                      description: Source for the variable's value. Cannot be used
-                        if value is not empty.
+                      description: The variable value from a key source (secret or
+                        configmap)
                       properties:
                         configMapKeyRef:
                           description: Selects a key of a ConfigMap.
@@ -3236,7 +3235,7 @@ spec:
                   type: object
                 type: array
               workspace:
-                description: The terraform workspae
+                description: The terraform workspae. Defaults to `default`
                 type: string
             required:
             - module
@@ -3247,11 +3246,11 @@ spec:
             properties:
               currentRunId:
                 type: string
-              generation:
-                format: int64
-                type: integer
               message:
                 type: string
+              observedGeneration:
+                format: int64
+                type: integer
               previousRuns:
                 items:
                   description: PreviousRuns stores the previous run information in
@@ -3269,7 +3268,7 @@ spec:
                 type: string
             required:
             - currentRunId
-            - generation
+            - observedGeneration
             - runStatus
             type: object
         type: object

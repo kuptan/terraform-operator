@@ -3,7 +3,7 @@ kind: Terraform
 metadata:
   name: terraform-run1
 spec:
-  terraformVersion: 1.0.2
+  terraformVersion: 1.1.7
 
   module:
     source: IbraheemAlSaady/test/module
@@ -22,7 +22,7 @@ kind: Terraform
 metadata:
   name: terraform-run2
 spec:
-  terraformVersion: 1.0.2
+  terraformVersion: 1.1.7
 
   module:
     source: IbraheemAlSaady/test/module

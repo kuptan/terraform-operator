@@ -225,8 +225,8 @@ var _ = Describe("Terraform Controller", func() {
 					Source:  "IbraheemAlSaady/test/module",
 					Version: "0.0.1",
 				},
-				DependsOn: []*v1alpha1.DependsOnSpec{
-					&v1alpha1.DependsOnSpec{
+				DependsOn: []*v1alpha1.DependsOn{
+					&v1alpha1.DependsOn{
 						Name:      run1Key.Name,
 						Namespace: run1Key.Namespace,
 					},

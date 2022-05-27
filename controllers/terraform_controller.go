@@ -56,9 +56,9 @@ type TerraformReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.Log.Info("Starting reconcile loop run", "NamespacedName", req.NamespacedName)
-
 	run := &v1alpha1.Terraform{}
+	start := time.Now()
+	durationMsg := fmt.Sprintf("reconcilation finished in %s", time.Now().Sub(start).String())
 
 	if err := r.Get(ctx, req.NamespacedName, run); err != nil {
 		if errors.IsNotFound(err) {
@@ -68,46 +68,52 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if run.IsSubmitted() || run.IsWaiting() {
-		requeue, err := r.create(run, req.NamespacedName)
+		result, err := r.create(run, req.NamespacedName)
 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		if requeue {
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		if result.RequeueAfter > 0 {
+			r.Log.Info(fmt.Sprintf("%s, next run in %s", durationMsg, result.RequeueAfter.String()))
+
+			return result, nil
 		}
 
 		r.Recorder.Event(run, "Normal", "Created", fmt.Sprintf("Run(%s) submitted", run.Status.RunId))
 
-		return ctrl.Result{}, nil
+		return result, nil
 	}
 
 	if run.IsStarted() {
-		requeue, err := r.watchRun(run, req.NamespacedName)
+		result, err := r.watchRun(run, req.NamespacedName)
 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		if requeue {
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		if result.RequeueAfter > 0 {
+			r.Log.Info(fmt.Sprintf("%s, next run in %s", durationMsg, result.RequeueAfter.String()))
+
+			return result, nil
 		}
 
-		return ctrl.Result{}, nil
+		return result, nil
 	}
 
 	if run.IsUpdated() {
 		r.Log.Info("updating a terraform run")
 
-		requeue, err := r.update(run, req.NamespacedName)
+		result, err := r.update(run, req.NamespacedName)
 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		if requeue {
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		if result.RequeueAfter > 0 {
+			r.Log.Info(fmt.Sprintf("%s, next run in %s", durationMsg, result.RequeueAfter.String()))
+
+			return result, nil
 		}
 
 		return ctrl.Result{}, nil

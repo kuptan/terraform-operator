@@ -3,7 +3,7 @@ package v1alpha1
 import (
 	"context"
 
-	"github.com/kube-champ/terraform-operator/pkg/kube"
+	"github.com/kube-champ/terraform-operator/internal/kube"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
