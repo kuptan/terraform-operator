@@ -17,6 +17,10 @@
    <a href="https://opensource.org/licenses/Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="license">
   </a>
+
+  <a href="https://img.shields.io/github/release/kube-champ/terraform-operator.svg?style=flat">
+    <img src="https://img.shields.io/github/release/kube-champ/terraform-operator.svg?style=flat" alt="license">
+  </a>
 </p>
 
 The Terraform Operator provides support to run Terraform modules in Kubernetes in a declarative way as a [Kubernetes manifest](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/).
