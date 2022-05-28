@@ -50,7 +50,7 @@ Chart can be found [here](https://github.com/kube-champ/helm-charts/tree/master/
 ```
 
 ## Docuemntation
-For docuemntation, check our page [here](https://kube-champ.github.io/terraform-operator/)
+Check the Terraform Operator [docs](https://kube-champ.github.io/terraform-operator/) for more details and examples
 
 ## Usage
 For more examples on how to use this CRD, check the [samples](https://kube-champ.github.io/terraform-operator/examples/)

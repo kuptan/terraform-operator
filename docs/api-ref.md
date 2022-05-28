@@ -1,4 +1,7 @@
----
+# API Reference
+To view the API reference, please visit [this page](https://doc.crds.dev/github.com/kube-champ/terraform-operator) 
+
+<!-- ---
 layout: default
 title: API Reference
 nav_order: 5
@@ -183,4 +186,4 @@ _Appears in:_
 | Field | Description |
 | --- | --- |
 | `key` _string_ | The module variable name |
-| `valueFrom` _[VolumeSource](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#volumesource-v1-core)_ | The source of the variable file |
+| `valueFrom` _[VolumeSource](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#volumesource-v1-core)_ | The source of the variable file | -->
