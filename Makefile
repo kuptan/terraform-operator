@@ -132,3 +132,11 @@ GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
+
+.PHONY: lint
+lint:
+	golangci-lint run --out-format code-climate | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+
+.PHONY: covhtml
+covhtml:
+	go tool cover -html=cover.out -o cover.html

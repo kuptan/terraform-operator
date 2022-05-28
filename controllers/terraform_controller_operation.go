@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	requeueDependency time.Duration = 20 * time.Second
 	requeueJobWatch   time.Duration = 20 * time.Second
+	requeueDependency time.Duration = 25 * time.Second
 )
 
 func updateRunStatus(r *TerraformReconciler, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
