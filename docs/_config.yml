@@ -39,7 +39,7 @@ search:
 heading_anchors: true
 
 aux_links:
-  "Terraform Operator on GitHub":
+  "GitHub":
     - "//github.com/kube-champ/terraform-operator"
 
 aux_links_new_tab: false
