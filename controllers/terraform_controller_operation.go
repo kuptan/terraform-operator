@@ -4,9 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
+)
+
+var (
+	requeueJobWatch   time.Duration = 20 * time.Second
+	requeueDependency time.Duration = 25 * time.Second
 )
 
 func updateRunStatus(r *TerraformReconciler, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
@@ -14,26 +21,20 @@ func updateRunStatus(r *TerraformReconciler, run *v1alpha1.Terraform, status v1a
 	r.Status().Update(context.Background(), run)
 }
 
-func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (bool, error) {
-	isDependencyReady, err := run.DependenciesCompleted()
+func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
+	err := r.checkDependencies(*run)
 
-	run.Status.Generation = run.Generation
+	run.Status.ObservedGeneration = run.Generation
 
 	if err != nil {
-		r.Log.Error(err, "failed create a terraform run while trying to check dependencies")
-
-		updateRunStatus(r, run, v1alpha1.RunFailed)
-
-		return false, err
-	}
-
-	if !isDependencyReady {
 		if !run.IsWaiting() {
-			r.Recorder.Event(run, "Normal", "Waiting", "Run has dependencies that are not completed")
+			r.Recorder.Event(run, "Normal", "Waiting", "Dependencies are not yet completed")
 			updateRunStatus(r, run, v1alpha1.RunWaitingForDependency)
 		}
 
-		return true, nil
+		return ctrl.Result{
+			RequeueAfter: requeueDependency,
+		}, nil
 	}
 
 	run.SetRunId()
@@ -41,19 +42,19 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 	_, err = run.CreateTerraformRun(namespacedName)
 
 	if err != nil {
-		r.Log.Error(err, "failed create a terraform run ")
+		r.Log.Error(err, "failed create a terraform run")
 
 		updateRunStatus(r, run, v1alpha1.RunFailed)
 
-		return false, err
+		return ctrl.Result{}, err
 	}
 
 	updateRunStatus(r, run, v1alpha1.RunStarted)
 
-	return false, nil
+	return ctrl.Result{}, nil
 }
 
-func (r *TerraformReconciler) update(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (bool, error) {
+func (r *TerraformReconciler) update(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
 	run.PrepareForUpdate()
 
 	r.Recorder.Event(run, "Normal", "Updated", "Creating a new run job")
@@ -61,18 +62,18 @@ func (r *TerraformReconciler) update(run *v1alpha1.Terraform, namespacedName typ
 	return r.create(run, namespacedName)
 }
 
-func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (bool, error) {
+func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
 	job, err := run.GetJobByRun()
 
 	r.Log.Info("watching job run to complete", "name", job.Name)
 
 	if err != nil {
-		return false, err
+		return ctrl.Result{}, err
 	}
 
 	// job hasn't started
 	if job.Status.Active == 0 && job.Status.Succeeded == 0 && job.Status.Failed == 0 {
-		return true, nil
+		return ctrl.Result{RequeueAfter: requeueJobWatch}, nil
 	}
 
 	// job is still running
@@ -83,7 +84,7 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 			r.Recorder.Event(run, "Normal", "Running", fmt.Sprintf("Run(%s) waiting for run job to finish", run.Status.RunId))
 		}
 
-		return true, nil
+		return ctrl.Result{RequeueAfter: requeueJobWatch}, nil
 	}
 
 	// job is successful
@@ -108,7 +109,7 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 
 		updateRunStatus(r, run, v1alpha1.RunCompleted)
 
-		return false, nil
+		return ctrl.Result{}, nil
 	}
 
 	// if it got here, then the job is failed -- sadly .... :( :( :(
@@ -117,5 +118,33 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 
 	updateRunStatus(r, run, v1alpha1.RunFailed)
 
-	return false, nil
+	return ctrl.Result{}, nil
+}
+
+func (r *TerraformReconciler) checkDependencies(run v1alpha1.Terraform) error {
+	for _, d := range run.Spec.DependsOn {
+
+		if d.Namespace == "" {
+			d.Namespace = run.Namespace
+		}
+
+		dName := types.NamespacedName{
+			Namespace: d.Namespace,
+			Name:      d.Name,
+		}
+
+		var dRun v1alpha1.Terraform
+
+		err := r.Get(context.Background(), dName, &dRun)
+
+		if err != nil {
+			return fmt.Errorf("unable to get '%s' dependency: %w", dName, err)
+		}
+
+		if dRun.Status.RunStatus != v1alpha1.RunCompleted {
+			return fmt.Errorf("dependency '%s' is not ready", dName)
+		}
+	}
+
+	return nil
 }

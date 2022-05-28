@@ -8,7 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kube-champ/terraform-operator/pkg/kube"
+	"github.com/kube-champ/terraform-operator/internal/kube"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -36,7 +36,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 					Source:  "IbraheemAlSaady/test/module",
 					Version: "0.0.1",
 				},
-				GitSSHKey: &GitSSHKeySpec{
+				GitSSHKey: &GitSSHKey{
 					ValueFrom: &corev1.VolumeSource{
 						Secret: &corev1.SecretVolumeSource{
 							SecretName: "mysecret",

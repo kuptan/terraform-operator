@@ -33,8 +33,8 @@ import (
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
 	"github.com/kube-champ/terraform-operator/controllers"
-	"github.com/kube-champ/terraform-operator/pkg/kube"
-	"github.com/kube-champ/terraform-operator/pkg/utils"
+	"github.com/kube-champ/terraform-operator/internal/kube"
+	"github.com/kube-champ/terraform-operator/internal/utils"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -101,15 +101,10 @@ func main() {
 	}
 
 	// Registering clientset
-	cfg, err := kube.CreateK8SConfig()
+	_, err = kube.CreateK8SConfig()
 
 	if err != nil {
 		setupLog.Error(err, "could not create Kubernetes REST config")
-		os.Exit(1)
-	}
-
-	if _, err := v1alpha1.NewForConfig(cfg); err != nil {
-		setupLog.Error(err, "could not create Kubernetes rest client for resource Run")
 		os.Exit(1)
 	}
 

@@ -3,7 +3,7 @@ package v1alpha1
 import (
 	"context"
 
-	"github.com/kube-champ/terraform-operator/pkg/kube"
+	"github.com/kube-champ/terraform-operator/internal/kube"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	batchv1 "k8s.io/api/batch/v1"
@@ -99,7 +99,7 @@ var _ = Describe("TerraformRun", func() {
 			By("run is now in a Failed state")
 			Expect(run2.HasErrored()).To(BeTrue())
 
-			run2.Status.Generation = run2.Generation
+			run2.Status.ObservedGeneration = run2.Generation
 			run2.Generation = 2
 
 			By("run generation was updated")
@@ -270,114 +270,6 @@ var _ = Describe("TerraformRun", func() {
 			err := run.DeleteAfterCompletion()
 
 			Expect(err).To(HaveOccurred())
-		})
-	})
-
-	Context("Run Dependencies", func() {
-		run1Key := types.NamespacedName{
-			Name:      "foofoo",
-			Namespace: "default",
-		}
-
-		run1 := &Terraform{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      run1Key.Name,
-				Namespace: run1Key.Namespace,
-			},
-			Spec: TerraformSpec{
-				TerraformVersion: "1.0.2",
-				Module: Module{
-					Source:  "IbraheemAlSaady/test/module",
-					Version: "0.0.1",
-				},
-			},
-			Status: TerraformStatus{
-				RunStatus: RunStarted,
-			},
-		}
-
-		run2 := &Terraform{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foobar",
-				Namespace: "default",
-			},
-			Spec: TerraformSpec{
-				TerraformVersion: "1.0.2",
-				Module: Module{
-					Source:  "IbraheemAlSaady/test/module",
-					Version: "0.0.1",
-				},
-				DependsOn: []*DependsOnSpec{
-					&DependsOnSpec{
-						Name: "foofoo",
-					},
-				},
-			},
-		}
-
-		It("should create terraform runs with dependencies", func() {
-			By("creating the first run")
-			Expect(k8sClient.Create(context.TODO(), run1)).To(Succeed())
-
-			completed, err := run1.DependenciesCompleted()
-
-			By("validating the first run that has no dependencies")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(completed).To(BeTrue())
-
-			By("creating the second run that is dependent on the first run")
-			Expect(k8sClient.Create(context.TODO(), run2)).To(Succeed())
-
-			By("validating the second run that is dependent on the first")
-
-			completed, err = run2.DependenciesCompleted()
-
-			Expect(err).ToNot(HaveOccurred())
-			Expect(completed).To(BeFalse())
-		})
-
-		It("should have completed dependencies", func() {
-			run1.Status.RunStatus = RunCompleted
-			Expect(k8sClient.Status().Update(context.TODO(), run1)).To(Succeed())
-
-			completed, err := run2.DependenciesCompleted()
-
-			Expect(err).ToNot(HaveOccurred())
-			Expect(completed).To(BeTrue())
-		})
-
-		It("should have uncompleted dependencies if dependency does not exist", func() {
-			Expect(k8sClient.Delete(context.TODO(), run1)).To(Succeed())
-
-			completed, err := run2.DependenciesCompleted()
-
-			Expect(err).ToNot(HaveOccurred())
-			Expect(completed).To(BeFalse())
-		})
-
-		It("should have completed dependencies if dependency is in a different namespace", func() {
-			run1.ObjectMeta.Namespace = "test"
-			run1.ResourceVersion = ""
-
-			run2.Spec.DependsOn[0].Namespace = "test"
-
-			Expect(k8sClient.Create(context.TODO(), &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
-				},
-			})).To(Succeed())
-
-			Expect(k8sClient.Create(context.TODO(), run1)).To(Succeed())
-
-			run1.Status.RunStatus = RunCompleted
-			Expect(k8sClient.Status().Update(context.TODO(), run1)).To(Succeed())
-
-			Expect(k8sClient.Update(context.TODO(), run2)).To(Succeed())
-
-			completed, err := run2.DependenciesCompleted()
-
-			Expect(err).ToNot(HaveOccurred())
-			Expect(completed).To(BeTrue())
 		})
 	})
 })

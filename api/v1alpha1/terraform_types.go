@@ -17,12 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
 	"fmt"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -60,7 +58,7 @@ type Variable struct {
 	EnvironmentVariable bool `json:"environmentVariable,omitempty"`
 }
 
-type OutputSpec struct {
+type Output struct {
 	// Output key specifies the Kubernetes secret key
 	// +optional
 	Key string `json:"key"`
@@ -70,15 +68,15 @@ type OutputSpec struct {
 }
 
 // DependsOnSpec specifies the dependency on other Terraform runs
-type DependsOnSpec struct {
+type DependsOn struct {
 	// The Terraform object metadata.name
 	Name string `json:"name"`
-	// The namespace where the Terraform run exist 
+	// The namespace where the Terraform run exist
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 }
 
-type GitSSHKeySpec struct {
+type GitSSHKey struct {
 	// The source of the value where the private SSH key exist
 	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
 }
@@ -111,7 +109,7 @@ type TerraformSpec struct {
 
 	// The terraform version to use
 	TerraformVersion string `json:"terraformVersion"`
-	// The module information (source & version) 
+	// The module information (source & version)
 	Module Module `json:"module"`
 	// A custom terraform backend configuration
 	// +optional
@@ -124,7 +122,7 @@ type TerraformSpec struct {
 	Workspace string `json:"workspace,omitempty"`
 	// A list of dependencies on other Terraform runs
 	// +optional
-	DependsOn []*DependsOnSpec `json:"dependsOn,omitempty"`
+	DependsOn []*DependsOn `json:"dependsOn,omitempty"`
 	// Variables as inputs to the Terraform module
 	// +optional
 	Variables []Variable `json:"variables,omitempty"`
@@ -133,7 +131,7 @@ type TerraformSpec struct {
 	VariableFiles []VariableFile `json:"variableFiles,omitempty"`
 	// Terraform outputs will be written to a Kubernetes secret
 	// +optional
-	Outputs []*OutputSpec `json:"outputs,omitempty"`
+	Outputs []*Output `json:"outputs,omitempty"`
 	// Indicates whether a destroy job should run
 	// +optional
 	Destroy bool `json:"destroy,omitempty"`
@@ -145,7 +143,7 @@ type TerraformSpec struct {
 	RetryLimit int32 `json:"retryLimit,omitempty"`
 	// An SSH key to be able to pull modules from private git repositories
 	// +optional
-	GitSSHKey *GitSSHKeySpec `json:"gitSSHKey,omitempty"`
+	GitSSHKey *GitSSHKey `json:"gitSSHKey,omitempty"`
 }
 
 // TerraformStatus defines the observed state of Terraform
@@ -153,11 +151,11 @@ type TerraformStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	RunId        string              `json:"currentRunId"`
-	PreviousRuns []PreviousRunStatus `json:"previousRuns,omitempty"`
-	Generation   int64               `json:"generation"`
-	RunStatus    TerraformRunStatus  `json:"runStatus"`
-	Message      string              `json:"message,omitempty"`
+	RunId              string              `json:"currentRunId"`
+	PreviousRuns       []PreviousRunStatus `json:"previousRuns,omitempty"`
+	ObservedGeneration int64               `json:"observedGeneration"`
+	RunStatus          TerraformRunStatus  `json:"runStatus"`
+	Message            string              `json:"message,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -185,7 +183,7 @@ type TerraformList struct {
 
 // this evaluate the first time the object was created
 func (t *Terraform) IsSubmitted() bool {
-	return t.Status.Generation == 0 && t.Status.RunId == ""
+	return t.Status.ObservedGeneration == 0 && t.Status.RunId == ""
 }
 
 // the run is either started or running
@@ -205,7 +203,7 @@ func (t *Terraform) IsRunning() bool {
 
 // check if the object was updated
 func (t *Terraform) IsUpdated() bool {
-	return t.Generation > 0 && t.Generation > t.Status.Generation
+	return t.Generation > 0 && t.Generation > t.Status.ObservedGeneration
 }
 
 // check if the run is waiting
@@ -232,7 +230,7 @@ func (t *Terraform) PrepareForUpdate() {
 	})
 }
 
-// returns the owner reference
+// GetOwnerReference returns the owner reference
 func (t *Terraform) GetOwnerReference() metav1.OwnerReference {
 	return metav1.OwnerReference{
 		APIVersion: fmt.Sprintf("%s/%s", GroupVersion.Group, GroupVersion.Version),
@@ -244,7 +242,7 @@ func (t *Terraform) GetOwnerReference() metav1.OwnerReference {
 
 const runnerRBACName string = "terraform-runner"
 
-// Creates a terraform Run as a Kubernetes job
+// CreateTerraformRun creates a job to execute the terraform module
 func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*batchv1.Job, error) {
 	if err := createRbacConfigIfNotExist(runnerRBACName, namespacedName.Namespace); err != nil {
 		return nil, err
@@ -287,36 +285,6 @@ func (t *Terraform) GetJobByRun() (*batchv1.Job, error) {
 	}
 
 	return job, err
-}
-
-func (t *Terraform) DependenciesCompleted() (bool, error) {
-	if len(t.Spec.DependsOn) == 0 {
-		return true, nil
-	}
-
-	for _, d := range t.Spec.DependsOn {
-		ns := t.Namespace
-
-		if d.Namespace != "" {
-			ns = d.Namespace
-		}
-
-		dep, err := terraformKubeClient.Terraforms(ns).Get(context.Background(), d.Name, metav1.GetOptions{})
-
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return false, nil
-			}
-
-			return false, err
-		}
-
-		if dep.Status.RunStatus != RunCompleted {
-			return false, nil
-		}
-	}
-
-	return true, nil
 }
 
 func init() {
