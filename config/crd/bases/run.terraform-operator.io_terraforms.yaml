@@ -3188,6 +3188,18 @@ spec:
                 description: Variables as inputs to the Terraform module
                 items:
                   properties:
+                    dependencyRef:
+                      description: DependencyRef denotes if this variable should be
+                        fetched from the output of a dependency
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - key
+                      - name
+                      type: object
                     environmentVariable:
                       description: EnvironmentVariable denotes if this variable should
                         be created as environment variable
@@ -3196,7 +3208,7 @@ spec:
                       description: Terraform module variable name
                       type: string
                     value:
-                      description: Variable value
+                      description: The value of the variable
                       type: string
                     valueFrom:
                       description: The variable value from a key source (secret or
@@ -3300,6 +3312,8 @@ spec:
               observedGeneration:
                 format: int64
                 type: integer
+              outputSecretName:
+                type: string
               previousRuns:
                 items:
                   description: PreviousRuns stores the previous run information in

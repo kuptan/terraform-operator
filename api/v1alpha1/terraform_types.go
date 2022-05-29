@@ -44,10 +44,15 @@ type VariableFile struct {
 	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
 }
 
+type TerraformDependencyRef struct {
+	Name string `json:"name"`
+	Key  string `json:"key"`
+}
+
 type Variable struct {
 	// Terraform module variable name
 	Key string `json:"key"`
-	// Variable value
+	// The value of the variable
 	// +optional
 	Value string `json:"value"`
 	// The variable value from a key source (secret or configmap)
@@ -56,6 +61,9 @@ type Variable struct {
 	// EnvironmentVariable denotes if this variable should be created as environment variable
 	// +optional
 	EnvironmentVariable bool `json:"environmentVariable,omitempty"`
+	// DependencyRef denotes if this variable should be fetched from the output of a dependency
+	// +optional
+	DependencyRef *TerraformDependencyRef `json:"dependencyRef,omitempty"`
 }
 
 type Output struct {
@@ -152,6 +160,7 @@ type TerraformStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	RunId              string              `json:"currentRunId"`
+	OutputSecretName   string              `json:"outputSecretName,omitempty"`
 	PreviousRuns       []PreviousRunStatus `json:"previousRuns,omitempty"`
 	ObservedGeneration int64               `json:"observedGeneration"`
 	RunStatus          TerraformRunStatus  `json:"runStatus"`
