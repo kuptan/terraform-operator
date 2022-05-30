@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// EnvConfig holds the environment variables information
 type EnvConfig struct {
 	DockerRepository        string
 	TerraformRunnerImage    string
@@ -12,8 +13,10 @@ type EnvConfig struct {
 	KnownHostsConfigMapName string
 }
 
+// Env holds the values of the environment variables
 var Env *EnvConfig
 
+// getEnvOrPanic returns a required environment variable and panics if it does not exist
 func getEnvOrPanic(name string) string {
 	env, present := os.LookupEnv(name)
 
@@ -24,6 +27,7 @@ func getEnvOrPanic(name string) string {
 	return env
 }
 
+// getEnvOptional returns an optional environment variable if exist
 func getEnvOptional(name string) string {
 	env, present := os.LookupEnv(name)
 
@@ -34,6 +38,7 @@ func getEnvOptional(name string) string {
 	return ""
 }
 
+// LoadEnv loads teh environment variables
 func LoadEnv() {
 	cfg := &EnvConfig{}
 

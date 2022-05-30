@@ -32,7 +32,7 @@ jobs:
         go tool cover -func coverage.txt
         rm coverage.tmp.txt
 
-    - name: Docker Build
+    - name: Docker Build Test
       run: docker build -t controller:latest .
 
     - name: Codecov Push

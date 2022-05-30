@@ -23,15 +23,17 @@ const (
 	gitSSHKeyVolumeName  string = "git-ssh"
 )
 
+// getTerraformRunnerDockerImage returns the Docker image for the Terraform Runner
 func getTerraformRunnerDockerImage() string {
 	return fmt.Sprintf("%s/%s:%s", utils.Env.DockerRepository, utils.Env.TerraformRunnerImage, utils.Env.TerraformRunnerImageTag)
 }
 
+// getBusyboxDockerImage returns the busy box image
 func getBusyboxDockerImage() string {
 	return fmt.Sprintf("%s/%s", utils.Env.DockerRepository, "busybox")
 }
 
-// returns a string that could or could not start with a TF_VAR_ prefix for the container
+// getEnvVarKey appends the prefix TF_VAR_ to the Terraform variable if its not marked as an environment variable
 func getEnvVarKey(v Variable) string {
 	prefix := ""
 
@@ -42,15 +44,14 @@ func getEnvVarKey(v Variable) string {
 	return fmt.Sprintf("%s%s", prefix, v.Key)
 }
 
-// returns a list of environment variables to injected to the job runner
-// these environment variables are specific to the terraform runner container
+// getRunnerSpecificEnvVars returns a list of environment variables to add to the Terraform Runner container
 func (t *Terraform) getRunnerSpecificEnvVars() []corev1.EnvVar {
 	envVars := []corev1.EnvVar{}
 
 	envVars = append(envVars, getEnvVariable("TERRAFORM_VERSION", t.Spec.TerraformVersion))
 	envVars = append(envVars, getEnvVariable("TERRAFORM_WORKING_DIR", moduleWorkingDirMountPath))
 	envVars = append(envVars, getEnvVariable("TERRAFORM_VAR_FILES_PATH", tfVarsMountPath))
-	envVars = append(envVars, getEnvVariable("OUTPUT_SECRET_NAME", getUniqueResourceName(t.Name, t.Status.RunId)))
+	envVars = append(envVars, getEnvVariable("OUTPUT_SECRET_NAME", getUniqueResourceName(t.Name, t.Status.RunID)))
 	envVars = append(envVars, getEnvVariable("TERRAFORM_DESTROY", strconv.FormatBool(t.Spec.Destroy)))
 
 	envVars = append(envVars, getEnvVariableFromFieldSelector("POD_NAMESPACE", "metadata.namespace"))
@@ -62,7 +63,7 @@ func (t *Terraform) getRunnerSpecificEnvVars() []corev1.EnvVar {
 	return envVars
 }
 
-// returns Kubernetes Pod environment variables to be passed to the run job
+// getEnvVariables returns Kubernetes Pod environment variables (corev1.EnvVar) to be passed to the workflow/run job
 func (t *Terraform) getEnvVariables() []corev1.EnvVar {
 	vars := []corev1.EnvVar{}
 
@@ -87,10 +88,11 @@ func (t *Terraform) getEnvVariables() []corev1.EnvVar {
 	return vars
 }
 
+// getRunnerSpecificVolumes returns the workflow/run volumes list
 func (t *Terraform) getRunnerSpecificVolumes() []corev1.Volume {
 	volumes := []corev1.Volume{}
 
-	name := getUniqueResourceName(t.Name, t.Status.RunId)
+	name := getUniqueResourceName(t.Name, t.Status.RunID)
 
 	volumes = append(volumes, getEmptyDirVolume(emptyDirVolumeName))
 	volumes = append(volumes, getVolumeSpecFromConfigMap(name, name))
@@ -103,7 +105,7 @@ func (t *Terraform) getRunnerSpecificVolumes() []corev1.Volume {
 	return volumes
 }
 
-// return the volumes to be mounted
+// getJobVolumes return the Kubernetes Job volumes as a list of corev1.Volume
 func (t *Terraform) getJobVolumes() []corev1.Volume {
 	volumes := []corev1.Volume{}
 
@@ -116,11 +118,12 @@ func (t *Terraform) getJobVolumes() []corev1.Volume {
 	return volumes
 }
 
+// getRunnerSpecificVolumeMounts returns a list of volume mounts
 func (t *Terraform) getRunnerSpecificVolumeMounts() []corev1.VolumeMount {
 	mounts := []corev1.VolumeMount{}
 
 	mounts = append(mounts, getVolumeMountSpec(emptyDirVolumeName, moduleWorkingDirMountPath, false))
-	mounts = append(mounts, getVolumeMountSpec(getUniqueResourceName(t.Name, t.Status.RunId), conifgMapModuleMountPath, false))
+	mounts = append(mounts, getVolumeMountSpec(getUniqueResourceName(t.Name, t.Status.RunID), conifgMapModuleMountPath, false))
 
 	if t.Spec.GitSSHKey != nil && t.Spec.GitSSHKey.ValueFrom != nil {
 		sshKeyFileName := "id_rsa"
@@ -136,7 +139,7 @@ func (t *Terraform) getRunnerSpecificVolumeMounts() []corev1.VolumeMount {
 	return mounts
 }
 
-// return the volumes mounts
+// getJobVolumeMounts return the volumes mounts for the Kubernetes Job of the workflow/run
 func (t *Terraform) getJobVolumeMounts() []corev1.VolumeMount {
 	mounts := []corev1.VolumeMount{}
 
@@ -150,7 +153,7 @@ func (t *Terraform) getJobVolumeMounts() []corev1.VolumeMount {
 	return mounts
 }
 
-// returnrs the initContainers definition for the run job
+// getInitContainersSpec returns the initContainers definition for the workflow/run job
 func getInitContainersSpec(t *Terraform) []corev1.Container {
 	containers := []corev1.Container{}
 
@@ -176,7 +179,7 @@ func getInitContainersSpec(t *Terraform) []corev1.Container {
 	return containers
 }
 
-// returns a Kubernetes job struct to run the terraform
+// getJobSpecForRun returns a Kubernetes job spec for the Terraform Runner
 func getJobSpecForRun(t *Terraform, owner metav1.OwnerReference) *batchv1.Job {
 
 	envVars := t.getEnvVariables()
@@ -185,9 +188,9 @@ func getJobSpecForRun(t *Terraform, owner metav1.OwnerReference) *batchv1.Job {
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      getUniqueResourceName(t.Name, t.Status.RunId),
+			Name:      getUniqueResourceName(t.Name, t.Status.RunID),
 			Namespace: t.Namespace,
-			Labels:    getCommonLabels(t.Name, t.Status.RunId),
+			Labels:    getCommonLabels(t.Name, t.Status.RunID),
 			OwnerReferences: []metav1.OwnerReference{
 				owner,
 			},
@@ -195,7 +198,7 @@ func getJobSpecForRun(t *Terraform, owner metav1.OwnerReference) *batchv1.Job {
 		Spec: batchv1.JobSpec{
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: getCommonLabels(t.Name, t.Status.RunId),
+					Labels: getCommonLabels(t.Name, t.Status.RunID),
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: "terraform-runner",
@@ -221,11 +224,11 @@ func getJobSpecForRun(t *Terraform, owner metav1.OwnerReference) *batchv1.Job {
 	return job
 }
 
-// Gets the kubernetes job for a specific run
-func getJobForRun(runName string, namespace string, runId string) (*batchv1.Job, error) {
+// getJobForRun returns the Kubernetes Job of a specific workflow/run
+func getJobForRun(runName string, namespace string, runID string) (*batchv1.Job, error) {
 	jobs := kube.ClientSet.BatchV1().Jobs(namespace)
 
-	name := getUniqueResourceName(runName, runId)
+	name := getUniqueResourceName(runName, runID)
 
 	job, err := jobs.Get(context.Background(), name, metav1.GetOptions{})
 
@@ -236,7 +239,8 @@ func getJobForRun(runName string, namespace string, runId string) (*batchv1.Job,
 	return job, err
 }
 
-func createJobForRun(run *Terraform, configMap *corev1.ConfigMap, secret *corev1.Secret) (*batchv1.Job, error) {
+// createJobForRun creates a Kubernetes Job to execute the workflow/run
+func createJobForRun(run *Terraform) (*batchv1.Job, error) {
 	jobs := kube.ClientSet.BatchV1().Jobs(run.Namespace)
 
 	ownerRef := run.GetOwnerReference()
@@ -250,11 +254,11 @@ func createJobForRun(run *Terraform, configMap *corev1.ConfigMap, secret *corev1
 	return job, nil
 }
 
-// Deletes the job run
-func deleteJobByRun(runName string, namespace string, runId string) error {
+// deleteJobByRun deletes the Kubernetes Job of the workflow/run
+func deleteJobByRun(runName string, namespace string, runID string) error {
 	jobs := kube.ClientSet.BatchV1().Jobs(namespace)
 
-	resourceName := getUniqueResourceName(runName, runId)
+	resourceName := getUniqueResourceName(runName, runID)
 
 	deletePolicy := metav1.DeletePropagationForeground
 

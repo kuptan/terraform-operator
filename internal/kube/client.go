@@ -12,8 +12,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+// ClientSet has the Kubernetes.Interface information, this will be set once the controller is running
 var ClientSet kubernetes.Interface
 
+// CreateK8SConfig creates the Kube client set
 func CreateK8SConfig() (*rest.Config, error) {
 	l := log.FromContext(context.Background())
 	dir, err := os.Getwd()

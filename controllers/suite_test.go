@@ -34,7 +34,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -51,7 +50,6 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 
@@ -198,7 +196,7 @@ func prepareRunnerRBAC() error {
 func makeRunJobRunning(r *v1alpha1.Terraform) {
 	jobsClient := kube.ClientSet.BatchV1().Jobs("default")
 
-	name := getRunName(r.Name, r.Status.RunId)
+	name := getRunName(r.Name, r.Status.RunID)
 
 	job, _ := jobsClient.Get(context.Background(), name, metav1.GetOptions{})
 
@@ -219,7 +217,7 @@ func makeRunJobRunning(r *v1alpha1.Terraform) {
 func makeRunJobSucceed(r *v1alpha1.Terraform) {
 	jobsClient := kube.ClientSet.BatchV1().Jobs("default")
 
-	name := getRunName(r.Name, r.Status.RunId)
+	name := getRunName(r.Name, r.Status.RunID)
 
 	job, _ := jobsClient.Get(context.Background(), name, metav1.GetOptions{})
 
@@ -239,7 +237,7 @@ func makeRunJobSucceed(r *v1alpha1.Terraform) {
 func makeRunJobFail(r *v1alpha1.Terraform) {
 	jobsClient := kube.ClientSet.BatchV1().Jobs("default")
 
-	name := getRunName(r.Name, r.Status.RunId)
+	name := getRunName(r.Name, r.Status.RunID)
 
 	job, _ := jobsClient.Get(context.Background(), name, metav1.GetOptions{})
 
@@ -260,13 +258,13 @@ func makeRunJobFail(r *v1alpha1.Terraform) {
 func isJobDeleted(r *v1alpha1.Terraform) bool {
 	jobsClient := kube.ClientSet.BatchV1().Jobs("default")
 
-	name := getRunName(r.Name, r.Status.RunId)
+	name := getRunName(r.Name, r.Status.RunID)
 
 	_, err := jobsClient.Get(context.Background(), name, metav1.GetOptions{})
 
 	return errors.IsNotFound(err)
 }
 
-func getRunName(name string, runId string) string {
-	return fmt.Sprintf("%s-%s", name, runId)
+func getRunName(name string, runID string) string {
+	return fmt.Sprintf("%s-%s", name, runID)
 }

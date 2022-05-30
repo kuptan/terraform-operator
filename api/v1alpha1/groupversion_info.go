@@ -24,6 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
+// Kubernetes Controller information
 var (
 	// GroupVersion is group version used to register these objects
 	GroupVersion = schema.GroupVersion{Group: "run.terraform-operator.io", Version: "v1alpha1"}

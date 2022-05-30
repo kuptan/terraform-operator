@@ -9,30 +9,16 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-// List all pods owned by the Run
-func (t *Terraform) GetSecretById(namespacedName types.NamespacedName) (*corev1.Secret, error) {
-	secrets := kube.ClientSet.CoreV1().Secrets(namespacedName.Namespace)
-
-	name := getUniqueResourceName(namespacedName.Name, t.Status.RunId)
-
-	secret, err := secrets.Get(context.Background(), name, metav1.GetOptions{})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return secret, err
-}
-
+// createSecretForOutputs creates a secret to store the the Terraform output of the workflow/run
 func createSecretForOutputs(namespacedName types.NamespacedName, t *Terraform) (*corev1.Secret, error) {
 	secrets := kube.ClientSet.CoreV1().Secrets(namespacedName.Namespace)
 
-	secretName := getUniqueResourceName(namespacedName.Name, t.Status.RunId)
+	secretName := getUniqueResourceName(namespacedName.Name, t.Status.RunID)
 
 	obj := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   secretName,
-			Labels: getCommonLabels(namespacedName.Name, t.Status.RunId),
+			Labels: getCommonLabels(namespacedName.Name, t.Status.RunID),
 			OwnerReferences: []metav1.OwnerReference{
 				t.GetOwnerReference(),
 			},

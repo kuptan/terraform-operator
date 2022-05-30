@@ -9,15 +9,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-// creates a k8s ConifgMap for the terraform module string
-// This configmap will be mounted in the pod so it can run the Terraform
-
-func getConfigMapSpecForModule(name string, namespace string, module string, runId string, owner metav1.OwnerReference) *corev1.ConfigMap {
+// getConfigMapSpecForModule returns a Kubernetes ConifgMap spec for the terraform module
+// This configmap will be mounted in the Terraform Runner pod
+func getConfigMapSpecForModule(name string, namespace string, module string, runID string, owner metav1.OwnerReference) *corev1.ConfigMap {
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      getUniqueResourceName(name, runId),
+			Name:      getUniqueResourceName(name, runID),
 			Namespace: namespace,
-			Labels:    getCommonLabels(name, runId),
+			Labels:    getCommonLabels(name, runID),
 			OwnerReferences: []metav1.OwnerReference{
 				owner,
 			},
@@ -30,6 +29,7 @@ func getConfigMapSpecForModule(name string, namespace string, module string, run
 	return cm
 }
 
+// createConfigMapForModule creates the ConfigMap for the Terraform workflow/run
 func createConfigMapForModule(namespacedName types.NamespacedName, run *Terraform) (*corev1.ConfigMap, error) {
 	configMaps := kube.ClientSet.CoreV1().ConfigMaps(namespacedName.Namespace)
 
@@ -42,7 +42,7 @@ func createConfigMapForModule(namespacedName types.NamespacedName, run *Terrafor
 	configMap := getConfigMapSpecForModule(
 		namespacedName.Name,
 		namespacedName.Namespace,
-		string(tpl), run.Status.RunId,
+		string(tpl), run.Status.RunID,
 		run.GetOwnerReference())
 
 	if _, err := configMaps.Create(context.TODO(), configMap, metav1.CreateOptions{}); err != nil {
