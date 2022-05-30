@@ -52,7 +52,18 @@ Chart can be found [here](https://github.com/kube-champ/helm-charts/tree/master/
 ## Docuemntation
 Check the Terraform Operator [docs](https://kube-champ.github.io/terraform-operator/) for more details and examples
 
-## Usage
+## Features
+[x] Point to any Terraform module (including Git)
+[x] Private Git repos authentication
+[x] Define Terraform variables and variable files
+[x] Target specific Terraform workspace
+[x] Custom backend & providers configuration
+[x] Terraform module outputs written to a secret
+[x] Dependency on other workflows
+[x] Terraform variables from the output of a dependency workflow
+[x] Specify retry limits]
+
+## Getting Started
 For more examples on how to use this CRD, check the [samples](https://kube-champ.github.io/terraform-operator/examples/)
 
 ```yaml
