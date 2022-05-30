@@ -83,6 +83,7 @@ spec:
   workspace:
 
   ## a custom terraform backend
+  ## if not provided, Kubernetes backend will be used as a default
   backend: |
     backend "local" {
       path = "/tmp/tfmodule/mytfstate.tfstate"
