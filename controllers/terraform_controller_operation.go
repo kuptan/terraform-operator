@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -22,7 +23,7 @@ func updateRunStatus(r *TerraformReconciler, run *v1alpha1.Terraform, status v1a
 }
 
 func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
-	err := r.checkDependencies(*run)
+	dependencies, err := r.checkDependencies(*run)
 
 	run.Status.ObservedGeneration = run.Generation
 
@@ -39,7 +40,9 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 
 	run.SetRunId()
 
-	_, err = run.CreateTerraformRun(namespacedName)
+	setVariablesFromDependencies(run, dependencies)
+
+	job, err := run.CreateTerraformRun(namespacedName)
 
 	if err != nil {
 		r.Log.Error(err, "failed create a terraform run")
@@ -49,6 +52,7 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 		return ctrl.Result{}, err
 	}
 
+	run.Status.OutputSecretName = job.ObjectMeta.Name
 	updateRunStatus(r, run, v1alpha1.RunStarted)
 
 	return ctrl.Result{}, nil
@@ -121,7 +125,9 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 	return ctrl.Result{}, nil
 }
 
-func (r *TerraformReconciler) checkDependencies(run v1alpha1.Terraform) error {
+func (r *TerraformReconciler) checkDependencies(run v1alpha1.Terraform) ([]v1alpha1.Terraform, error) {
+	dependencies := []v1alpha1.Terraform{}
+
 	for _, d := range run.Spec.DependsOn {
 
 		if d.Namespace == "" {
@@ -138,13 +144,55 @@ func (r *TerraformReconciler) checkDependencies(run v1alpha1.Terraform) error {
 		err := r.Get(context.Background(), dName, &dRun)
 
 		if err != nil {
-			return fmt.Errorf("unable to get '%s' dependency: %w", dName, err)
+			return dependencies, fmt.Errorf("unable to get '%s' dependency: %w", dName, err)
 		}
 
 		if dRun.Status.RunStatus != v1alpha1.RunCompleted {
-			return fmt.Errorf("dependency '%s' is not ready", dName)
+			return dependencies, fmt.Errorf("dependency '%s' is not ready", dName)
+		}
+
+		dependencies = append(dependencies, dRun)
+	}
+
+	return dependencies, nil
+}
+
+// setVariablesFromDependencies sets the variable from the output of a dependency
+// this currently only works with runs within the same namespace
+func setVariablesFromDependencies(run *v1alpha1.Terraform, dependencies []v1alpha1.Terraform) {
+	if len(dependencies) == 0 {
+		return
+	}
+
+	for _, v := range run.Spec.Variables {
+		if v.DependencyRef == nil {
+			continue
+		}
+
+		for index, d := range dependencies {
+			if d.Name == v.DependencyRef.Name && d.Namespace == run.Namespace {
+				tfVarRef := &v1.EnvVarSource{
+					SecretKeyRef: &v1.SecretKeySelector{
+						Key: v.DependencyRef.Key,
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: d.Status.OutputSecretName,
+						},
+					},
+				}
+
+				tfVar := v1alpha1.Variable{
+					Key:           v.Key,
+					DependencyRef: v.DependencyRef,
+					ValueFrom:     tfVarRef,
+				}
+
+				// remove the current variable from the list
+				run.Spec.Variables = append(run.Spec.Variables[:index], run.Spec.Variables[index+1:]...)
+				// add a new variable with the valueFrom
+				run.Spec.Variables = append(run.Spec.Variables, tfVar)
+			}
 		}
 	}
 
-	return nil
+	return
 }

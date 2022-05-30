@@ -209,7 +209,13 @@ var _ = Describe("Terraform Controller", func() {
 				TerraformVersion: "1.0.2",
 				Module: v1alpha1.Module{
 					Source:  "IbraheemAlSaady/test/module",
-					Version: "0.0.1",
+					Version: "0.0.3",
+				},
+				Outputs: []*v1alpha1.Output{
+					&v1alpha1.Output{
+						Key:              "number",
+						ModuleOutputName: "number",
+					},
 				},
 			},
 		}
@@ -223,7 +229,16 @@ var _ = Describe("Terraform Controller", func() {
 				TerraformVersion: "1.0.2",
 				Module: v1alpha1.Module{
 					Source:  "IbraheemAlSaady/test/module",
-					Version: "0.0.1",
+					Version: "0.0.3",
+				},
+				Variables: []v1alpha1.Variable{
+					v1alpha1.Variable{
+						Key: "length",
+						DependencyRef: &v1alpha1.TerraformDependencyRef{
+							Name: run1Key.Name,
+							Key:  "number",
+						},
+					},
 				},
 				DependsOn: []*v1alpha1.DependsOn{
 					&v1alpha1.DependsOn{
@@ -234,7 +249,7 @@ var _ = Describe("Terraform Controller", func() {
 			},
 		}
 
-		It("Should create runs successfully with the correct dependency flow", func() {
+		It("should create runs successfully with the correct dependency flow", func() {
 			// Create
 			Expect(k8sClient.Create(context.Background(), run1)).Should(Succeed())
 
@@ -285,5 +300,6 @@ var _ = Describe("Terraform Controller", func() {
 				return r.Status.RunStatus
 			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
 		})
+
 	})
 })

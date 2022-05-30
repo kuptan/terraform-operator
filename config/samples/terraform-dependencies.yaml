@@ -7,15 +7,17 @@ spec:
 
   module:
     source: IbraheemAlSaady/test/module
-    version: 0.0.2
+    version: 0.0.3
 
   variables:
     - key: length
-      value: "16"
+      value: "4"
 
   outputs:
     - key: result
       moduleOutputName: result
+    - key: number
+      moduleOutputName: number
 ---
 apiVersion: run.terraform-operator.io/v1alpha1
 kind: Terraform
@@ -26,14 +28,16 @@ spec:
 
   module:
     source: IbraheemAlSaady/test/module
-    version: 0.0.2
+    version: 0.0.3
 
   dependsOn:
     - name: terraform-run1
 
   variables:
     - key: length
-      value: "16"
+      dependencyRef:
+        name: terraform-run1
+        key: number
 
   outputs:
     - key: result
