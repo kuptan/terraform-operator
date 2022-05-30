@@ -67,7 +67,7 @@ var _ = Describe("TerraformRun", func() {
 		It("should correctly handle run statuses", func() {
 			run1 := &Terraform{
 				Status: TerraformStatus{
-					RunId: "",
+					RunID: "",
 				},
 			}
 
@@ -83,8 +83,8 @@ var _ = Describe("TerraformRun", func() {
 				},
 			}
 
-			run2.SetRunId()
-			Expect(run2.Status.RunId).To(HaveLen(8))
+			run2.SetRunID()
+			Expect(run2.Status.RunID).To(HaveLen(8))
 
 			By("run is now in a Started state")
 			Expect(run2.IsSubmitted()).To(BeFalse())
@@ -117,7 +117,7 @@ var _ = Describe("TerraformRun", func() {
 		It("should handle a terraform run job", func() {
 			run := fetched.DeepCopy()
 
-			run.Status.RunId = "1234"
+			run.Status.RunID = "1234"
 
 			job, err := run.CreateTerraformRun(key)
 			Expect(err).ToNot(HaveOccurred(), "failed to create a terraform run")
@@ -144,7 +144,7 @@ var _ = Describe("TerraformRun", func() {
 		It("should handle previous statuses", func() {
 			run := &Terraform{
 				Status: TerraformStatus{
-					RunId:     "1234",
+					RunID:     "1234",
 					RunStatus: RunCompleted,
 				},
 			}
@@ -152,7 +152,7 @@ var _ = Describe("TerraformRun", func() {
 			run.PrepareForUpdate()
 
 			Expect(run.Status.PreviousRuns).To(HaveLen(1))
-			Expect(run.Status.PreviousRuns[0].RunId).To(Equal("1234"))
+			Expect(run.Status.PreviousRuns[0].RunID).To(Equal("1234"))
 			Expect(run.Status.PreviousRuns[0].Status).To(Equal(RunCompleted))
 		})
 	})
@@ -184,11 +184,11 @@ var _ = Describe("TerraformRun", func() {
 				DeleteCompletedJobs: false,
 			},
 			Status: TerraformStatus{
-				RunId: "1234",
+				RunID: "1234",
 			},
 		}
 
-		name := getUniqueResourceName(run.Name, run.Status.RunId)
+		name := getUniqueResourceName(run.Name, run.Status.RunID)
 
 		It("should fail to create a run due to existing configmap", func() {
 			cfg := corev1.ConfigMap{

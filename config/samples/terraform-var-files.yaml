@@ -34,6 +34,10 @@ spec:
       valueFrom:
         configMap:
           name: var-files-data1
+    # - key: secret-config
+    #   valueFrom:
+    #     secret:
+    #       secretName: mysecret
 
   outputs:
     - key: result

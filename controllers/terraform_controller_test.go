@@ -59,7 +59,7 @@ var _ = Describe("Terraform Controller", func() {
 				r := &v1alpha1.Terraform{}
 				k8sClient.Get(context.Background(), key, r)
 
-				return r.Status.RunId
+				return r.Status.RunID
 			}, timeout, interval).ShouldNot(BeEmpty())
 
 			By("expect status to be started")
@@ -253,12 +253,12 @@ var _ = Describe("Terraform Controller", func() {
 			// Create
 			Expect(k8sClient.Create(context.Background(), run1)).Should(Succeed())
 
-			By("evaluating run1 runId")
+			By("evaluating run1 RunID")
 			Eventually(func() string {
 				r := &v1alpha1.Terraform{}
 				k8sClient.Get(context.Background(), run1Key, r)
 
-				return r.Status.RunId
+				return r.Status.RunID
 			}, timeout, interval).ShouldNot(BeEmpty())
 
 			// Create
@@ -287,7 +287,7 @@ var _ = Describe("Terraform Controller", func() {
 				r := &v1alpha1.Terraform{}
 				k8sClient.Get(context.Background(), run2Key, r)
 
-				return r.Status.RunId
+				return r.Status.RunID
 			}, timeout, interval).ShouldNot(BeEmpty())
 
 			By("expect run2 status to be completed")

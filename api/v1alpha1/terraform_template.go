@@ -5,6 +5,7 @@ import (
 	"text/template"
 )
 
+// getTerraformModuleFromTemplate generates the Terraform module template
 func getTerraformModuleFromTemplate(run *Terraform) ([]byte, error) {
 	tfTemplate, err := template.New("main.tf").Parse(`terraform {
 		{{- if .Spec.Backend }}

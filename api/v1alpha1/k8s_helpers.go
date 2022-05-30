@@ -4,7 +4,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// returns a volume spec
+// getVolumeSpec returns a volume spec
 func getVolumeSpec(name string, source corev1.VolumeSource) corev1.Volume {
 	return corev1.Volume{
 		Name:         name,
@@ -12,7 +12,7 @@ func getVolumeSpec(name string, source corev1.VolumeSource) corev1.Volume {
 	}
 }
 
-// returns a volume spec from configMap
+// getVolumeSpecFromConfigMap returns a volume spec from configMap
 func getVolumeSpecFromConfigMap(volumeName string, configMapName string) corev1.Volume {
 	return corev1.Volume{
 		Name: volumeName,
@@ -26,7 +26,7 @@ func getVolumeSpecFromConfigMap(volumeName string, configMapName string) corev1.
 	}
 }
 
-// returns and emptyDir volume spec
+// getEmptyDirVolume returns and emptyDir volume spec
 func getEmptyDirVolume(name string) corev1.Volume {
 	return corev1.Volume{
 		Name: name,
@@ -36,7 +36,7 @@ func getEmptyDirVolume(name string) corev1.Volume {
 	}
 }
 
-// returns a volume mount spec
+// getVolumeMountSpec returns a volume mount spec
 func getVolumeMountSpec(volumeName string, mountPath string, readOnly bool) corev1.VolumeMount {
 	return corev1.VolumeMount{
 		Name:      volumeName,
@@ -45,7 +45,7 @@ func getVolumeMountSpec(volumeName string, mountPath string, readOnly bool) core
 	}
 }
 
-// returns a volume mount spec with subpath option
+// getVolumeMountSpecWithSubPath returns a volume mount spec with subpath option
 func getVolumeMountSpecWithSubPath(volumeName string, mountPath string, subPath string, readOnly bool) corev1.VolumeMount {
 	return corev1.VolumeMount{
 		Name:      volumeName,
@@ -55,6 +55,7 @@ func getVolumeMountSpecWithSubPath(volumeName string, mountPath string, subPath 
 	}
 }
 
+// getEnvVariable returns a Kubernetes environment variable spec
 func getEnvVariable(name string, value string) corev1.EnvVar {
 	return corev1.EnvVar{
 		Name:  name,
@@ -62,6 +63,7 @@ func getEnvVariable(name string, value string) corev1.EnvVar {
 	}
 }
 
+// getEnvVariableFromFieldSelector returns a Kubernetes environment variable from a field selector
 func getEnvVariableFromFieldSelector(name string, path string) corev1.EnvVar {
 	return corev1.EnvVar{
 		Name: name,

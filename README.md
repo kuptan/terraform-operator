@@ -52,6 +52,17 @@ Chart can be found [here](https://github.com/kube-champ/helm-charts/tree/master/
 ## Docuemntation
 Check the Terraform Operator [docs](https://kube-champ.github.io/terraform-operator/) for more details and examples
 
+## Features
+- [x] Point to any Terraform module (including Git)
+- [x] Private Git repos authentication
+- [x] Define Terraform variables and variable files
+- [x] Target specific Terraform workspace
+- [x] Custom backend & providers configuration
+- [x] Terraform module outputs written to a Kubernetes Secret
+- [x] Dependency on other workflows
+- [x] Terraform variables from the output of a dependency workflow
+- [x] Specify retry limits
+
 ## Usage
 For more examples on how to use this CRD, check the [samples](https://kube-champ.github.io/terraform-operator/examples/)
 
@@ -84,6 +95,12 @@ spec:
   variables:
     - key: length
       value: "16"
+
+    - key: something
+      ## only works if the dependency is in the same namespace
+      dependencyRef:
+        name: my-dependency-name
+        key: the output secret key
     
     - key: AWS_ACCESS_KEY
       valueFrom:
@@ -101,6 +118,8 @@ spec:
         ## can also be 'secret'
         configMap:
           name: "terraform-env-config"
+        # secret:
+        #   secretName: mysecret
 
   dependsOn:
     - name: run-base
@@ -110,7 +129,10 @@ spec:
   ## ssh key from a secret to allow pull modules from private git repos
   gitSSHKey:
     valueFrom:
-      ....
+      secret:
+        ## secret key must be id_rsa
+        secretName: git-ssh-key
+        defaultMode: 0600
 
   ## outputs defined will be stored in a Kubernetes secret
   outputs:

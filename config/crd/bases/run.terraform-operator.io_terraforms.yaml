@@ -44,7 +44,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: TerraformSpec defines the desired state of Terraform
+            description: TerraformSpec defines the desired state of Terraform object
             properties:
               backend:
                 description: A custom terraform backend configuration
@@ -56,8 +56,7 @@ spec:
               dependsOn:
                 description: A list of dependencies on other Terraform runs
                 items:
-                  description: DependsOnSpec specifies the dependency on other Terraform
-                    runs
+                  description: DependsOn holds the information of the Terraform dependency
                   properties:
                     name:
                       description: The Terraform object metadata.name
@@ -1610,6 +1609,8 @@ spec:
               outputs:
                 description: Terraform outputs will be written to a Kubernetes secret
                 items:
+                  description: Output holds the information of the Terraform output
+                    information that will be written to a Kubernetes secret
                   properties:
                     key:
                       description: Output key specifies the Kubernetes secret key
@@ -1633,6 +1634,8 @@ spec:
               variableFiles:
                 description: Terraform variable files
                 items:
+                  description: VariableFile holds the information of the Terraform
+                    variable files to include
                   properties:
                     key:
                       description: The module variable name
@@ -3190,6 +3193,7 @@ spec:
               variables:
                 description: Variables as inputs to the Terraform module
                 items:
+                  description: Variable holds the information of the Terraform variable
                   properties:
                     dependencyRef:
                       description: DependencyRef denotes if this variable should be
@@ -3319,8 +3323,8 @@ spec:
                 type: string
               previousRuns:
                 items:
-                  description: PreviousRuns stores the previous run information in
-                    case the current run object was modified
+                  description: PreviousRunStatus stores the previous workflows/runs
+                    information in case the current workflow/run object was modified
                   properties:
                     id:
                       description: Attribute name in module
@@ -3331,6 +3335,7 @@ spec:
                   type: object
                 type: array
               runStatus:
+                description: TerraformRunStatus is the status of the workflow/run
                 type: string
             required:
             - currentRunId

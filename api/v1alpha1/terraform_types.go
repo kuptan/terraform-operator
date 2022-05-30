@@ -28,6 +28,7 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// Module holds the Terraform module source and version information
 type Module struct {
 	// module source, must be a valid Terraform module source
 	Source string `json:"source"`
@@ -36,6 +37,7 @@ type Module struct {
 	Version string `json:"version,omitempty"`
 }
 
+// VariableFile holds the information of the Terraform variable files to include
 type VariableFile struct {
 	// The module variable name
 	Key string `json:"key"`
@@ -44,11 +46,14 @@ type VariableFile struct {
 	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
 }
 
+// TerraformDependencyRef holds the information of the Terraform dependency name and key for the module
+// to use as a variable
 type TerraformDependencyRef struct {
 	Name string `json:"name"`
 	Key  string `json:"key"`
 }
 
+// Variable holds the information of the Terraform variable
 type Variable struct {
 	// Terraform module variable name
 	Key string `json:"key"`
@@ -66,6 +71,8 @@ type Variable struct {
 	DependencyRef *TerraformDependencyRef `json:"dependencyRef,omitempty"`
 }
 
+// Output holds the information of the Terraform output information
+// that will be written to a Kubernetes secret
 type Output struct {
 	// Output key specifies the Kubernetes secret key
 	// +optional
@@ -75,7 +82,7 @@ type Output struct {
 	ModuleOutputName string `json:"moduleOutputName"`
 }
 
-// DependsOnSpec specifies the dependency on other Terraform runs
+// DependsOn holds the information of the Terraform dependency
 type DependsOn struct {
 	// The Terraform object metadata.name
 	Name string `json:"name"`
@@ -84,13 +91,16 @@ type DependsOn struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
+// GitSSHKey holds the information of the Git SSH key
 type GitSSHKey struct {
 	// The source of the value where the private SSH key exist
 	ValueFrom *corev1.VolumeSource `json:"valueFrom"`
 }
 
+// TerraformRunStatus is the status of the workflow/run
 type TerraformRunStatus string
 
+// workflow/run statuses
 const (
 	RunStarted              TerraformRunStatus = "Started"
 	RunRunning              TerraformRunStatus = "Running"
@@ -100,17 +110,18 @@ const (
 	RunWaitingForDependency TerraformRunStatus = "WaitingForDependency"
 )
 
-// PreviousRuns stores the previous run information in case the current run object was modified
+// PreviousRunStatus stores the previous workflows/runs information
+// in case the current workflow/run object was modified
 type PreviousRunStatus struct {
 	// Attribute name in module
 	// +optional
-	RunId string `json:"id"`
+	RunID string `json:"id"`
 	// Value
 	// +optional
 	Status TerraformRunStatus `json:"status"`
 }
 
-// TerraformSpec defines the desired state of Terraform
+// TerraformSpec defines the desired state of Terraform object
 type TerraformSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -159,7 +170,7 @@ type TerraformStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	RunId              string              `json:"currentRunId"`
+	RunID              string              `json:"currentRunId"`
 	OutputSecretName   string              `json:"outputSecretName,omitempty"`
 	PreviousRuns       []PreviousRunStatus `json:"previousRuns,omitempty"`
 	ObservedGeneration int64               `json:"observedGeneration"`
@@ -191,12 +202,12 @@ type TerraformList struct {
 	Items           []Terraform `json:"items"`
 }
 
-// this evaluate the first time the object was created
+// IsSubmitted evaluates if the workflow/run is created for the first time
 func (t *Terraform) IsSubmitted() bool {
-	return t.Status.ObservedGeneration == 0 && t.Status.RunId == ""
+	return t.Status.ObservedGeneration == 0 && t.Status.RunID == ""
 }
 
-// the run is either started or running
+// IsStarted evaluates that the workflow/run is started
 func (t *Terraform) IsStarted() bool {
 	allowedStatuses := map[TerraformRunStatus]bool{
 		RunStarted: true,
@@ -206,41 +217,45 @@ func (t *Terraform) IsStarted() bool {
 	return allowedStatuses[t.Status.RunStatus]
 }
 
-// check if the status is running
+// IsRunning evaluates that the workflow/run is running
 func (t *Terraform) IsRunning() bool {
 	return t.Status.RunStatus == RunRunning
 }
 
-// check if the object was updated
+// IsUpdated evaluates if the workflow/run was updated
 func (t *Terraform) IsUpdated() bool {
 	return t.Generation > 0 && t.Generation > t.Status.ObservedGeneration
 }
 
-// check if the run is waiting
+// IsWaiting evaluates if the workflow/run is waiting for a dependency
 func (t *Terraform) IsWaiting() bool {
 	return t.Status.RunStatus == RunWaitingForDependency
 }
 
+// HasErrored evaluates if the workflow/run failed
 func (t *Terraform) HasErrored() bool {
 	return t.Status.RunStatus == RunFailed
 }
 
-func (r *Terraform) SetRunId() {
-	r.Status.RunId = random(8)
+// SetRunID sets a new value for the run ID
+func (t *Terraform) SetRunID() {
+	t.Status.RunID = random(8)
 }
 
+// PrepareForUpdate prepares the workflow/run for the update
+// this include appending the previous run to the status as an example
 func (t *Terraform) PrepareForUpdate() {
 	if len(t.Status.PreviousRuns) == 0 {
 		t.Status.PreviousRuns = []PreviousRunStatus{}
 	}
 
 	t.Status.PreviousRuns = append(t.Status.PreviousRuns, PreviousRunStatus{
-		RunId:  t.Status.RunId,
+		RunID:  t.Status.RunID,
 		Status: t.Status.RunStatus,
 	})
 }
 
-// GetOwnerReference returns the owner reference
+// GetOwnerReference returns the Kubernetes owner reference meta
 func (t *Terraform) GetOwnerReference() metav1.OwnerReference {
 	return metav1.OwnerReference{
 		APIVersion: fmt.Sprintf("%s/%s", GroupVersion.Group, GroupVersion.Version),
@@ -250,27 +265,33 @@ func (t *Terraform) GetOwnerReference() metav1.OwnerReference {
 	}
 }
 
+// runnerRBACName is the RBAC name that will be used in the role and service account creation
+// if they're not found
 const runnerRBACName string = "terraform-runner"
 
-// CreateTerraformRun creates a job to execute the terraform module
+// CreateTerraformRun creates the Kubernetes objects to start the workflow/run
+//
+// (RBAC (service account & Role), ConfigMap for the terraform module file,
+// Secret to store the outputs if any, will be empty if no outputs are defined,
+// Job to execute the workflow/run)
 func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*batchv1.Job, error) {
 	if err := createRbacConfigIfNotExist(runnerRBACName, namespacedName.Namespace); err != nil {
 		return nil, err
 	}
 
-	configMap, err := createConfigMapForModule(namespacedName, t)
+	_, err := createConfigMapForModule(namespacedName, t)
 
 	if err != nil {
 		return nil, err
 	}
 
-	secret, err := createSecretForOutputs(namespacedName, t)
+	_, err = createSecretForOutputs(namespacedName, t)
 
 	if err != nil {
 		return nil, err
 	}
 
-	job, err := createJobForRun(t, configMap, secret)
+	job, err := createJobForRun(t)
 
 	if err != nil {
 		return nil, err
@@ -279,16 +300,18 @@ func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*ba
 	return job, nil
 }
 
+// DeleteAfterCompletion removes the Kubernetes of the workflow/run once completed
 func (t *Terraform) DeleteAfterCompletion() error {
-	if err := deleteJobByRun(t.Name, t.Namespace, t.Status.RunId); err != nil {
+	if err := deleteJobByRun(t.Name, t.Namespace, t.Status.RunID); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// GetJobByRun returns the Kubernetes job of the workflow/run
 func (t *Terraform) GetJobByRun() (*batchv1.Job, error) {
-	job, err := getJobForRun(t.Name, t.Namespace, t.Status.RunId)
+	job, err := getJobForRun(t.Name, t.Namespace, t.Status.RunID)
 
 	if err != nil {
 		return nil, err
@@ -297,6 +320,7 @@ func (t *Terraform) GetJobByRun() (*batchv1.Job, error) {
 	return job, err
 }
 
+// Init initializes the scheme builder
 func init() {
 	SchemeBuilder.Register(&Terraform{}, &TerraformList{})
 }

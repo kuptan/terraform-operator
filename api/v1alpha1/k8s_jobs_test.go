@@ -47,7 +47,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 				DeleteCompletedJobs: false,
 			},
 			Status: TerraformStatus{
-				RunId: "12345",
+				RunID: "12345",
 			},
 		}
 
@@ -70,8 +70,9 @@ var _ = Describe("Kubernetes RBAC", func() {
 			var sshVolume *corev1.Volume
 
 			for _, v := range job.Spec.Template.Spec.Volumes {
+				vol := v
 				if v.Name == gitSSHKeyVolumeName {
-					sshVolume = &v
+					sshVolume = &vol
 					break
 				}
 			}
@@ -120,7 +121,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 				},
 			},
 			Status: TerraformStatus{
-				RunId: "12345",
+				RunID: "12345",
 			},
 		}
 

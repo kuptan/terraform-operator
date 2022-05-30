@@ -1,8 +1,9 @@
 package v1alpha1
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strings"
 )
 
@@ -28,22 +29,24 @@ func removeString(slice []string, s string) (result []string) {
 }
 
 // generates a random alphanumeric based on the length provided
-func random(n int) string {
+func random(n int64) string {
 	var letters = []rune("123456790abcdefghijklmnopqrstuvwxyz")
 
 	b := make([]rune, n)
 
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		generated, _ := rand.Int(rand.Reader, big.NewInt(n))
+
+		b[i] = letters[generated.Int64()]
 	}
 	return string(b)
 }
 
 // returns common labels to be attached to children resources
-func getCommonLabels(name string, runId string) map[string]string {
+func getCommonLabels(name string, runID string) map[string]string {
 	return map[string]string{
 		"terraformRunName": name,
-		"terraformRunId":   runId,
+		"terraformRunId":   runID,
 		"component":        "Terraform-run",
 		"owner":            "run.terraform-operator.io",
 	}
@@ -61,8 +64,8 @@ func truncateResourceName(s string, i int) string {
 }
 
 // creates a name for the terraform Run job
-func getUniqueResourceName(name string, runId string) string {
+func getUniqueResourceName(name string, runID string) string {
 	// return fmt.Sprintf("tf-apply-%s-%s", name, runId)
 
-	return fmt.Sprintf("%s-%s", truncateResourceName(name, 220), runId)
+	return fmt.Sprintf("%s-%s", truncateResourceName(name, 220), runID)
 }

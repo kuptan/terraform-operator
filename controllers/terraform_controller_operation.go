@@ -17,20 +17,23 @@ var (
 	requeueDependency time.Duration = 25 * time.Second
 )
 
-func updateRunStatus(r *TerraformReconciler, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
+func (r *TerraformReconciler) updateRunStatus(ctx context.Context, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
 	run.Status.RunStatus = status
-	r.Status().Update(context.Background(), run)
+
+	if err := r.Status().Update(ctx, run); err != nil {
+		r.Log.Error(err, "failed to update status")
+	}
 }
 
-func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
-	dependencies, err := r.checkDependencies(*run)
+func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
+	dependencies, err := r.checkDependencies(ctx, *run)
 
 	run.Status.ObservedGeneration = run.Generation
 
 	if err != nil {
 		if !run.IsWaiting() {
 			r.Recorder.Event(run, "Normal", "Waiting", "Dependencies are not yet completed")
-			updateRunStatus(r, run, v1alpha1.RunWaitingForDependency)
+			r.updateRunStatus(ctx, run, v1alpha1.RunWaitingForDependency)
 		}
 
 		return ctrl.Result{
@@ -38,7 +41,7 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 		}, nil
 	}
 
-	run.SetRunId()
+	run.SetRunID()
 
 	setVariablesFromDependencies(run, dependencies)
 
@@ -47,29 +50,29 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 	if err != nil {
 		r.Log.Error(err, "failed create a terraform run")
 
-		updateRunStatus(r, run, v1alpha1.RunFailed)
+		r.updateRunStatus(ctx, run, v1alpha1.RunFailed)
 
 		return ctrl.Result{}, err
 	}
 
 	run.Status.OutputSecretName = job.ObjectMeta.Name
-	updateRunStatus(r, run, v1alpha1.RunStarted)
+	r.updateRunStatus(ctx, run, v1alpha1.RunStarted)
 
 	return ctrl.Result{}, nil
 }
 
-func (r *TerraformReconciler) update(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
+func (r *TerraformReconciler) handleRunUpdate(ctx context.Context, run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
 	run.PrepareForUpdate()
 
 	r.Recorder.Event(run, "Normal", "Updated", "Creating a new run job")
 
-	return r.create(run, namespacedName)
+	return r.handleRunCreate(ctx, run, namespacedName)
 }
 
-func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
+func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alpha1.Terraform) (ctrl.Result, error) {
 	job, err := run.GetJobByRun()
 
-	r.Log.Info("watching job run to complete", "name", job.Name)
+	r.Log.Info("waiting for terraform job run to complete", "name", job.Name)
 
 	if err != nil {
 		return ctrl.Result{}, err
@@ -83,9 +86,9 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 	// job is still running
 	if job.Status.Active > 0 {
 		if !run.IsRunning() {
-			updateRunStatus(r, run, v1alpha1.RunRunning)
+			r.updateRunStatus(ctx, run, v1alpha1.RunRunning)
 
-			r.Recorder.Event(run, "Normal", "Running", fmt.Sprintf("Run(%s) waiting for run job to finish", run.Status.RunId))
+			r.Recorder.Event(run, "Normal", "Running", fmt.Sprintf("Run(%s) waiting for run job to finish", run.Status.RunID))
 		}
 
 		return ctrl.Result{RequeueAfter: requeueJobWatch}, nil
@@ -99,33 +102,33 @@ func (r *TerraformReconciler) watchRun(run *v1alpha1.Terraform, namespacedName t
 			r.Log.Info("deleting completed job")
 
 			if err := run.DeleteAfterCompletion(); err != nil {
-				r.Log.Error(err, "failed to delete run job after completion", "name", job.Name)
+				r.Log.Error(err, "failed to delete terraform run job after completion", "name", job.Name)
 			} else {
-				r.Recorder.Event(run, "Normal", "Cleanup", fmt.Sprintf("Run(%s) kubernetes job was deleted", run.Status.RunId))
+				r.Recorder.Event(run, "Normal", "Cleanup", fmt.Sprintf("Run(%s) kubernetes job was deleted", run.Status.RunID))
 			}
 		}
 
 		if !run.Spec.Destroy {
-			r.Recorder.Event(run, "Normal", "Completed", fmt.Sprintf("Run(%s) completed", run.Status.RunId))
+			r.Recorder.Event(run, "Normal", "Completed", fmt.Sprintf("Run(%s) completed", run.Status.RunID))
 		} else {
-			r.Recorder.Event(run, "Normal", "Destroyed", fmt.Sprintf("Run(%s) completed with terraform destroy", run.Status.RunId))
+			r.Recorder.Event(run, "Normal", "Destroyed", fmt.Sprintf("Run(%s) completed with terraform destroy", run.Status.RunID))
 		}
 
-		updateRunStatus(r, run, v1alpha1.RunCompleted)
+		r.updateRunStatus(ctx, run, v1alpha1.RunCompleted)
 
 		return ctrl.Result{}, nil
 	}
 
 	// if it got here, then the job is failed -- sadly .... :( :( :(
-	r.Recorder.Event(run, "Warning", "Failed", fmt.Sprintf("Run(%s) failed", run.Status.RunId))
+	r.Recorder.Event(run, "Warning", "Failed", fmt.Sprintf("Run(%s) failed", run.Status.RunID))
 	r.Log.Error(errors.New("job failed"), "terraform run job failed to complete", "name", job.Name)
 
-	updateRunStatus(r, run, v1alpha1.RunFailed)
+	r.updateRunStatus(ctx, run, v1alpha1.RunFailed)
 
 	return ctrl.Result{}, nil
 }
 
-func (r *TerraformReconciler) checkDependencies(run v1alpha1.Terraform) ([]v1alpha1.Terraform, error) {
+func (r *TerraformReconciler) checkDependencies(ctx context.Context, run v1alpha1.Terraform) ([]v1alpha1.Terraform, error) {
 	dependencies := []v1alpha1.Terraform{}
 
 	for _, d := range run.Spec.DependsOn {
@@ -141,7 +144,7 @@ func (r *TerraformReconciler) checkDependencies(run v1alpha1.Terraform) ([]v1alp
 
 		var dRun v1alpha1.Terraform
 
-		err := r.Get(context.Background(), dName, &dRun)
+		err := r.Get(ctx, dName, &dRun)
 
 		if err != nil {
 			return dependencies, fmt.Errorf("unable to get '%s' dependency: %w", dName, err)
@@ -193,6 +196,4 @@ func setVariablesFromDependencies(run *v1alpha1.Terraform, dependencies []v1alph
 			}
 		}
 	}
-
-	return
 }

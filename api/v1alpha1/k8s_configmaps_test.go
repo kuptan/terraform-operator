@@ -38,7 +38,7 @@ var _ = Describe("Kubernetes ConfigMaps", func() {
 				DeleteCompletedJobs: false,
 			},
 			Status: TerraformStatus{
-				RunId: "1234",
+				RunID: "1234",
 			},
 		}
 
