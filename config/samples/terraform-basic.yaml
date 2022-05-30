@@ -1,0 +1,14 @@
+apiVersion: run.terraform-operator.io/v1alpha1
+kind: Terraform
+metadata:
+  name: basic-module
+spec:
+  terraformVersion: 1.1.7
+
+  module:
+    source: IbraheemAlSaady/test/module
+    version: 0.0.3
+
+  variables:
+    - key: length
+      value: "4"

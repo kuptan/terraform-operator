@@ -265,6 +265,17 @@ func (t *Terraform) GetOwnerReference() metav1.OwnerReference {
 	}
 }
 
+// setBackendCfgIfNotExist sets the default backend to Kunernetes if not provided
+func setBackendCfgIfNotExist(run *Terraform) {
+	if run.Spec.Backend == "" {
+		run.Spec.Backend = fmt.Sprintf(`backend "kubernetes" {
+  secret_suffix     = "%s"
+  in_cluster_config = true
+}
+`, run.ObjectMeta.Name)
+	}
+}
+
 // runnerRBACName is the RBAC name that will be used in the role and service account creation
 // if they're not found
 const runnerRBACName string = "terraform-runner"
@@ -275,6 +286,8 @@ const runnerRBACName string = "terraform-runner"
 // Secret to store the outputs if any, will be empty if no outputs are defined,
 // Job to execute the workflow/run)
 func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*batchv1.Job, error) {
+	setBackendCfgIfNotExist(t)
+
 	if err := createRbacConfigIfNotExist(runnerRBACName, namespacedName.Namespace); err != nil {
 		return nil, err
 	}
