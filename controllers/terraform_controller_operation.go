@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/kube-champ/terraform-operator/api/v1alpha1"
@@ -43,8 +42,6 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 
 	setVariablesFromDependencies(run, dependencies)
 
-	log.Println(run.Spec.Variables)
-
 	job, err := run.CreateTerraformRun(namespacedName)
 
 	if err != nil {
@@ -55,7 +52,7 @@ func (r *TerraformReconciler) create(run *v1alpha1.Terraform, namespacedName typ
 		return ctrl.Result{}, err
 	}
 
-	run.Status.OutputSecretName = job.Name
+	run.Status.OutputSecretName = job.ObjectMeta.Name
 	updateRunStatus(r, run, v1alpha1.RunStarted)
 
 	return ctrl.Result{}, nil
