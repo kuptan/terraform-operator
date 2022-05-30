@@ -118,6 +118,8 @@ spec:
         ## can also be 'secret'
         configMap:
           name: "terraform-env-config"
+        # secret:
+        #   secretName: mysecret
 
   dependsOn:
     - name: run-base
@@ -127,7 +129,10 @@ spec:
   ## ssh key from a secret to allow pull modules from private git repos
   gitSSHKey:
     valueFrom:
-      ....
+      secret:
+        ## secret key must be id_rsa
+        secretName: git-ssh-key
+        defaultMode: 0600
 
   ## outputs defined will be stored in a Kubernetes secret
   outputs:
