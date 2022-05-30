@@ -21,6 +21,7 @@ jobs:
     - name: Build
       run: make build
 
+    ## Ref: https://github.com/golangci/golangci-lint-action
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v3
 
