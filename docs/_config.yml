@@ -4,7 +4,7 @@ remote_theme: pmarsceill/just-the-docs
 
 title: Terraform Operator
 baseurl: "/terraform-operator"
-url: "https://kube-champ.github.io"
+url: "https://kuptan.github.io"
 
 permalink: pretty
 exclude: ["script/", "LICENSE", "hack/", "bin/", "README.md"]
