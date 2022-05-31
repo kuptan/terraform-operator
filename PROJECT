@@ -2,7 +2,7 @@ domain: terraform-operator.io
 layout:
 - go.kubebuilder.io/v3
 projectName: terraform-operator
-repo: github.com/kube-champ/terraform-operator
+repo: github.com/kuptan/terraform-operator
 resources:
 - api:
     crdVersion: v1
@@ -11,6 +11,6 @@ resources:
   domain: terraform-operator.io
   group: run
   kind: Terraform
-  path: github.com/kube-champ/terraform-operator/api/v1alpha1
+  path: github.com/kuptan/terraform-operator/api/v1alpha1
   version: v1alpha1
 version: "3"

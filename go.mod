@@ -1,4 +1,4 @@
-module github.com/kube-champ/terraform-operator
+module github.com/kuptan/terraform-operator
 
 go 1.17
 

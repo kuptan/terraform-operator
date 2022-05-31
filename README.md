@@ -2,24 +2,24 @@
 <p align="center"><img src="docs/img/tfo.svg" width="260"></p>
 
 <p align="center">
-  <a href="https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml">
-    <img src="https://github.com/kube-champ/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master" alt="build">
+  <a href="https://github.com/kuptan/terraform-operator/actions/workflows/build.yaml">
+    <img src="https://github.com/kuptan/terraform-operator/actions/workflows/build.yaml/badge.svg?branch=master" alt="build">
   </a>
   
-  <a href="https://codecov.io/gh/kube-champ/terraform-operator">
-    <img src="https://codecov.io/gh/kube-champ/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC" alt="codecov">
+  <a href="https://codecov.io/gh/kuptan/terraform-operator">
+    <img src="https://codecov.io/gh/kuptan/terraform-operator/branch/master/graph/badge.svg?token=CE594EPJOC" alt="codecov">
   </a>
 
-   <a href="https://goreportcard.com/report/github.com/kube-champ/terraform-operator">
-    <img src="https://goreportcard.com/badge/github.com/kube-champ/terraform-operator" alt="go report">
+   <a href="https://goreportcard.com/report/github.com/kuptan/terraform-operator">
+    <img src="https://goreportcard.com/badge/github.com/kuptan/terraform-operator" alt="go report">
   </a>
 
    <a href="https://opensource.org/licenses/Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="license">
   </a>
 
-  <a href="https://img.shields.io/github/release/kube-champ/terraform-operator.svg?style=flat">
-    <img src="https://img.shields.io/github/release/kube-champ/terraform-operator.svg?style=flat" alt="license">
+  <a href="https://img.shields.io/github/release/kuptan/terraform-operator.svg?style=flat">
+    <img src="https://img.shields.io/github/release/kuptan/terraform-operator.svg?style=flat" alt="license">
   </a>
 </p>
 
@@ -29,28 +29,28 @@ This project makes running a Terraform module, Kubernetes native through a singl
 
 **Disclaimer**
 
-This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works, have a look at the [design doc](https://kube-champ.github.io/terraform-operator/design/)
+This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works, have a look at the [design doc](https://kuptan.github.io/terraform-operator/design/)
 
 ## Installation
 
 **Helm**
 
 ```bash
-  helm repo add kube-champ https://kube-champ.github.io/helm-charts
-  helm install terraform-operator kube-champ/terraform-operator
+  helm repo add kuptan https://kuptan.github.io/helm-charts
+  helm install terraform-operator kuptan/terraform-operator
 ```
 
-Chart can be found [here](https://github.com/kube-champ/helm-charts/tree/master/charts/terraform-operator)
+Chart can be found [here](https://github.com/kuptan/helm-charts/tree/master/charts/terraform-operator)
 
 **Kubectl**
 
 ```bash
-  kubectl apply -k https://github.com/kube-champ/terraform-operator/config/crd 
-  kubectl apply -k https://github.com/kube-champ/terraform-operator/config/manifest
+  kubectl apply -k https://github.com/kuptan/terraform-operator/config/crd 
+  kubectl apply -k https://github.com/kuptan/terraform-operator/config/manifest
 ```
 
 ## Docuemntation
-Check the Terraform Operator [docs](https://kube-champ.github.io/terraform-operator/) for more details and examples
+Check the Terraform Operator [docs](https://kuptan.github.io/terraform-operator/) for more details and examples
 
 ## Features
 - [x] Point to any Terraform module (including Git)
@@ -64,7 +64,7 @@ Check the Terraform Operator [docs](https://kube-champ.github.io/terraform-opera
 - [x] Specify retry limits
 
 ## Usage
-For more examples on how to use this CRD, check the [samples](https://kube-champ.github.io/terraform-operator/examples/)
+For more examples on how to use this CRD, check the [samples](https://kuptan.github.io/terraform-operator/examples/)
 
 ```yaml
 apiVersion: run.terraform-operator.io/v1alpha1
@@ -153,7 +153,7 @@ spec:
 ```
 
 ## Roadmap
-Check the [Terraform Operator Project](https://github.com/orgs/kube-champ/projects/1) to see what's on the roadmap
+Check the [Terraform Operator Project](https://github.com/orgs/kuptan/projects/1) to see what's on the roadmap
 
 ## Contributing
 If you find this project useful, help us:
@@ -162,4 +162,4 @@ If you find this project useful, help us:
 - Help new users with issues they may encounter :muscle:
 - Send a pull request with your new features and bug fixes :rocket: 
 
-For instructions about setting up your environment to develop and extend the operator, please see [contributing.md](https://kube-champ.github.io/terraform-operator/contributing-guide/)
+For instructions about setting up your environment to develop and extend the operator, please see [contributing.md](https://kuptan.github.io/terraform-operator/contributing-guide/)

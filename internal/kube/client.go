@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kube-champ/terraform-operator/internal/utils"
+	"github.com/kuptan/terraform-operator/internal/utils"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	clientcmd "k8s.io/client-go/tools/clientcmd"

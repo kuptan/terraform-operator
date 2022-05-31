@@ -7,7 +7,7 @@ nav_order: 3
 # Terraform Operator Design
 Here is how the terraform operator works
 
-![operator design](https://github.com/kube-champ/terraform-operator/blob/master/docs/img/design.png?raw=true "terraform operator")
+![operator design](https://github.com/kuptan/terraform-operator/blob/master/docs/img/design.png?raw=true "terraform operator")
 
 Let's say you created and applied the following manifest to Kubernetes:
 

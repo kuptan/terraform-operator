@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/kube-champ/terraform-operator/internal/kube"
-	"github.com/kube-champ/terraform-operator/internal/utils"
+	"github.com/kuptan/terraform-operator/internal/kube"
+	"github.com/kuptan/terraform-operator/internal/utils"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

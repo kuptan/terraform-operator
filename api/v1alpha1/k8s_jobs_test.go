@@ -8,7 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kube-champ/terraform-operator/internal/kube"
+	"github.com/kuptan/terraform-operator/internal/kube"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
