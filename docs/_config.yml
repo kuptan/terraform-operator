@@ -60,6 +60,9 @@ kramdown:
     block:
       line_numbers: false
 
+plugins:
+  - jekyll-seo-tag
+
 compress_html:
   clippings: all
   comments: all
