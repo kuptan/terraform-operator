@@ -31,7 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/go-logr/logr"
-	"github.com/kube-champ/terraform-operator/api/v1alpha1"
+	"github.com/kuptan/terraform-operator/api/v1alpha1"
 )
 
 // TerraformReconciler reconciles a Terraform object

@@ -10,15 +10,15 @@ You can install the Terraform Operator either with `Helm` or directly apply the 
 **Helm**
 
 ```bash
-  helm repo add kube-champ https://kube-champ.github.io/helm-charts
-  helm install terraform-operator kube-champ/terraform-operator
+  helm repo add kuptan https://kuptan.github.io/helm-charts
+  helm install terraform-operator kuptan/terraform-operator
 ```
 
-The Helm Chart source code can be found [here](https://github.com/kube-champ/helm-charts/tree/master/charts/terraform-operator)
+The Helm Chart source code can be found [here](https://github.com/kuptan/helm-charts/tree/master/charts/terraform-operator)
 
 **Kubectl**
 
 ```bash
-  kubectl apply -k https://github.com/kube-champ/terraform-operator/config/crd 
-  kubectl apply -k https://github.com/kube-champ/terraform-operator/config/manifest
+  kubectl apply -k https://github.com/kuptan/terraform-operator/config/crd 
+  kubectl apply -k https://github.com/kuptan/terraform-operator/config/manifest
 ```

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kube-champ/terraform-operator/api/v1alpha1"
+	"github.com/kuptan/terraform-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"

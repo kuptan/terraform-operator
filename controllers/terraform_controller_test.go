@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/kube-champ/terraform-operator/api/v1alpha1"
+	"github.com/kuptan/terraform-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

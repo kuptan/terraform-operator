@@ -17,7 +17,7 @@ If you're interested in contributing to this project, you'll need:
   * cloud managed (AWS EKS, Azure AKS, GKE, etc...)
 
 # Quick start
-This project uses the [terraform-runner](https://github.com/kube-champ/terraform-runner) project to execute terraform commands. 
+This project uses the [terraform-runner](https://github.com/kuptan/terraform-runner) project to execute terraform commands. 
 If you're not familiar with how this controller works under the hood, its highly recommended to visit the [design docs](./design.md) first.
 
 #### Now lets start

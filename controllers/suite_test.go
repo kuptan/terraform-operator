@@ -41,9 +41,9 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/kube-champ/terraform-operator/api/v1alpha1"
-	"github.com/kube-champ/terraform-operator/internal/kube"
-	"github.com/kube-champ/terraform-operator/internal/utils"
+	"github.com/kuptan/terraform-operator/api/v1alpha1"
+	"github.com/kuptan/terraform-operator/internal/kube"
+	"github.com/kuptan/terraform-operator/internal/utils"
 	//+kubebuilder:scaffold:imports
 )
 

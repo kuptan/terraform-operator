@@ -5,7 +5,7 @@ nav_order: 6
 ---
 
 # Customization
-The Terraform Operator uses the [terraform-runner](https://github.com/kube-champ/terraform-runner) as its terraform runner to execute terraform commands. If you don't want to use the default [terraform-runner](https://github.com/kube-champ/terraform-runner), you can build your own.
+The Terraform Operator uses the [terraform-runner](https://github.com/kuptan/terraform-runner) as its terraform runner to execute terraform commands. If you don't want to use the default [terraform-runner](https://github.com/kuptan/terraform-runner), you can build your own.
 
 To make the operator use your terraform runner, the Terraform Operator expects the following environment variables:
 
@@ -28,7 +28,7 @@ terraformRunner:
 ## Building Your Runner
 The runner of course must be a docker container at the end, the implementation in the container is up to you, however, there are few things to keep in mind.
 
-When Terraform Operator creates Kubernetes jobs with the Terraform Runner, it sets some environment variables on the Terraform Runner container. For a technical view, have a look at this [code section](https://github.com/kube-champ/terraform-operator/blob/master/api/v1alpha1/k8s_jobs.go#L16)
+When Terraform Operator creates Kubernetes jobs with the Terraform Runner, it sets some environment variables on the Terraform Runner container. For a technical view, have a look at this [code section](https://github.com/kuptan/terraform-operator/blob/master/api/v1alpha1/k8s_jobs.go#L16)
 
 
 | Environment Variable     | Default value        | Description                                                                        |
