@@ -32,14 +32,16 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/kuptan/terraform-operator/api/v1alpha1"
+	"github.com/kuptan/terraform-operator/internal/metrics"
 )
 
 // TerraformReconciler reconciles a Terraform object
 type TerraformReconciler struct {
 	client.Client
-	Scheme   *runtime.Scheme
-	Recorder record.EventRecorder
-	Log      logr.Logger
+	Scheme          *runtime.Scheme
+	Recorder        record.EventRecorder
+	MetricsRecorder metrics.RecorderInterface
+	Log             logr.Logger
 }
 
 //+kubebuilder:rbac:groups=run.terraform-operator.io,resources=terraforms,verbs=get;list;watch;create;update;patch;delete
@@ -81,6 +83,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 
 		r.Recorder.Event(run, "Normal", "Created", fmt.Sprintf("Run(%s) submitted", run.Status.RunID))
+		r.MetricsRecorder.RecordTotal(run.Name, run.Namespace)
 
 		return result, nil
 	}

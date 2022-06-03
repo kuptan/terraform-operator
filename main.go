@@ -30,10 +30,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	crtlmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/kuptan/terraform-operator/api/v1alpha1"
 	"github.com/kuptan/terraform-operator/controllers"
 	"github.com/kuptan/terraform-operator/internal/kube"
+	"github.com/kuptan/terraform-operator/internal/metrics"
 	"github.com/kuptan/terraform-operator/internal/utils"
 	//+kubebuilder:scaffold:imports
 )
@@ -67,6 +69,9 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
+	metricsRecorder := metrics.NewRecorder()
+	crtlmetrics.Registry.MustRegister(metricsRecorder.Collectors()...)
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -82,10 +87,11 @@ func main() {
 	}
 
 	if err = (&controllers.TerraformReconciler{
-		Client:   mgr.GetClient(),
-		Scheme:   mgr.GetScheme(),
-		Recorder: mgr.GetEventRecorderFor("terraform-controller"),
-		Log:      ctrl.Log.WithName("controllers").WithName("TerraformController"),
+		Client:          mgr.GetClient(),
+		Scheme:          mgr.GetScheme(),
+		Recorder:        mgr.GetEventRecorderFor("terraform-controller"),
+		MetricsRecorder: metricsRecorder,
+		Log:             ctrl.Log.WithName("controllers").WithName("TerraformController"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Terraform")
 		os.Exit(1)

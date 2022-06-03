@@ -13,12 +13,21 @@ import (
 )
 
 var (
-	requeueJobWatch   time.Duration = 20 * time.Second
-	requeueDependency time.Duration = 25 * time.Second
+	requeueJobWatch   time.Duration = 10 * time.Second
+	requeueDependency time.Duration = 20 * time.Second
+	dateFormat        string        = "2006-01-02 15:04:05"
 )
 
 func (r *TerraformReconciler) updateRunStatus(ctx context.Context, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
 	run.Status.RunStatus = status
+
+	if status != v1alpha1.RunStarted {
+		r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, status, false)
+	}
+
+	if status == v1alpha1.RunCompleted || status == v1alpha1.RunDestroyed {
+		run.Status.CompletionTime = time.Now().Format(dateFormat)
+	}
 
 	if err := r.Status().Update(ctx, run); err != nil {
 		r.Log.Error(err, "failed to update status")
@@ -29,6 +38,7 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 	dependencies, err := r.checkDependencies(ctx, *run)
 
 	run.Status.ObservedGeneration = run.Generation
+	run.Status.StartedTime = time.Now().Format(dateFormat)
 
 	if err != nil {
 		if !run.IsWaiting() {
@@ -62,8 +72,6 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 }
 
 func (r *TerraformReconciler) handleRunUpdate(ctx context.Context, run *v1alpha1.Terraform, namespacedName types.NamespacedName) (ctrl.Result, error) {
-	run.PrepareForUpdate()
-
 	r.Recorder.Event(run, "Normal", "Updated", "Creating a new run job")
 
 	return r.handleRunCreate(ctx, run, namespacedName)
@@ -77,6 +85,18 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
+	startTime, err := time.Parse(dateFormat, run.Status.StartedTime)
+
+	if err != nil {
+		r.Log.Error(err, "failed to parse status started at to time")
+	}
+
+	defer r.MetricsRecorder.RecordDuration(
+		run.Name,
+		run.Namespace,
+		startTime,
+	)
 
 	// job hasn't started
 	if job.Status.Active == 0 && job.Status.Succeeded == 0 && job.Status.Failed == 0 {
