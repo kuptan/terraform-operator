@@ -170,12 +170,13 @@ type TerraformStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	RunID              string              `json:"currentRunId"`
-	OutputSecretName   string              `json:"outputSecretName,omitempty"`
-	PreviousRuns       []PreviousRunStatus `json:"previousRuns,omitempty"`
-	ObservedGeneration int64               `json:"observedGeneration"`
-	RunStatus          TerraformRunStatus  `json:"runStatus"`
-	Message            string              `json:"message,omitempty"`
+	RunID              string             `json:"currentRunId"`
+	OutputSecretName   string             `json:"outputSecretName,omitempty"`
+	ObservedGeneration int64              `json:"observedGeneration"`
+	RunStatus          TerraformRunStatus `json:"runStatus"`
+	Message            string             `json:"message,omitempty"`
+	StartedTime        string             `json:"startTime,omitempty"`
+	CompletionTime     string             `json:"completionTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -240,19 +241,6 @@ func (t *Terraform) HasErrored() bool {
 // SetRunID sets a new value for the run ID
 func (t *Terraform) SetRunID() {
 	t.Status.RunID = random(8)
-}
-
-// PrepareForUpdate prepares the workflow/run for the update
-// this include appending the previous run to the status as an example
-func (t *Terraform) PrepareForUpdate() {
-	if len(t.Status.PreviousRuns) == 0 {
-		t.Status.PreviousRuns = []PreviousRunStatus{}
-	}
-
-	t.Status.PreviousRuns = append(t.Status.PreviousRuns, PreviousRunStatus{
-		RunID:  t.Status.RunID,
-		Status: t.Status.RunStatus,
-	})
 }
 
 // GetOwnerReference returns the Kubernetes owner reference meta

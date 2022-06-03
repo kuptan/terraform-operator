@@ -43,6 +43,7 @@ import (
 
 	"github.com/kuptan/terraform-operator/api/v1alpha1"
 	"github.com/kuptan/terraform-operator/internal/kube"
+	"github.com/kuptan/terraform-operator/internal/metrics"
 	"github.com/kuptan/terraform-operator/internal/utils"
 	//+kubebuilder:scaffold:imports
 )
@@ -50,8 +51,20 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var k8sClient client.Client
-var testEnv *envtest.Environment
+type mockMetricsRecorder struct {
+	metrics.RecorderInterface
+}
+
+func (m *mockMetricsRecorder) RecordTotal(name string, namespace string) {}
+func (m *mockMetricsRecorder) RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus, deleted bool) {
+}
+func (m *mockMetricsRecorder) RecordDuration(name string, namespace string, start time.Time) {}
+
+var (
+	k8sClient             client.Client
+	testEnv               *envtest.Environment
+	mockedMetricsRecorder *mockMetricsRecorder = &mockMetricsRecorder{}
+)
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -95,9 +108,10 @@ var _ = BeforeSuite(func() {
 	Expect(k8sClient).NotTo(BeNil())
 
 	err = (&TerraformReconciler{
-		Client:   k8sClient,
-		Recorder: k8sManager.GetEventRecorderFor("terraform-controller"),
-		Log:      ctrl.Log.WithName("controllers").WithName("TerraformController"),
+		Client:          k8sClient,
+		Recorder:        k8sManager.GetEventRecorderFor("terraform-controller"),
+		Log:             ctrl.Log.WithName("controllers").WithName("TerraformController"),
+		MetricsRecorder: mockedMetricsRecorder,
 	}).SetupWithManager(k8sManager)
 
 	Expect(err).NotTo(HaveOccurred(), "failed to setup controller in test")

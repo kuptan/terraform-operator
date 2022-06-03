@@ -3312,6 +3312,8 @@ spec:
           status:
             description: TerraformStatus defines the observed state of Terraform
             properties:
+              completionTime:
+                type: string
               currentRunId:
                 type: string
               message:
@@ -3321,21 +3323,10 @@ spec:
                 type: integer
               outputSecretName:
                 type: string
-              previousRuns:
-                items:
-                  description: PreviousRunStatus stores the previous workflows/runs
-                    information in case the current workflow/run object was modified
-                  properties:
-                    id:
-                      description: Attribute name in module
-                      type: string
-                    status:
-                      description: Value
-                      type: string
-                  type: object
-                type: array
               runStatus:
                 description: TerraformRunStatus is the status of the workflow/run
+                type: string
+              startTime:
                 type: string
             required:
             - currentRunId

@@ -140,21 +140,6 @@ var _ = Describe("TerraformRun", func() {
 
 			Expect(owner).ToNot(BeNil())
 		})
-
-		It("should handle previous statuses", func() {
-			run := &Terraform{
-				Status: TerraformStatus{
-					RunID:     "1234",
-					RunStatus: RunCompleted,
-				},
-			}
-
-			run.PrepareForUpdate()
-
-			Expect(run.Status.PreviousRuns).To(HaveLen(1))
-			Expect(run.Status.PreviousRuns[0].RunID).To(Equal("1234"))
-			Expect(run.Status.PreviousRuns[0].Status).To(Equal(RunCompleted))
-		})
 	})
 
 	Context("Run Errors", func() {
