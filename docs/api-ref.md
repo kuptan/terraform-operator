@@ -1,3 +1,9 @@
+---
+layout: default
+title: API Reference
+nav_order: 9
+---
+
 # API Reference
 To view the API reference, please visit [this page](https://doc.crds.dev/github.com/kuptan/terraform-operator) 
 

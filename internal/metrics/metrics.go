@@ -37,14 +37,14 @@ func NewRecorder() RecorderInterface {
 		statusGauge: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
 				Name: "tfo_workflow_status",
-				Help: "The current condition status of a Terraform workflow/run resource reconciliation.",
+				Help: "The current status of a Terraform workflow/run resource reconciliation.",
 			},
 			[]string{"name", "namespace", "status"},
 		),
 		durationHistogram: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Name:    "tfo_workflow_duration_seconds",
-				Help:    "The duration in seconds of a Terraform workflow/run resource reconciliation.",
+				Help:    "The duration in seconds of a Terraform workflow/run.",
 				Buckets: prometheus.ExponentialBuckets(10e-9, 10, 10),
 			},
 			[]string{"name", "namespace"},
