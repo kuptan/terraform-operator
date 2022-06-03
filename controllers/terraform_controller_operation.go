@@ -25,6 +25,10 @@ func (r *TerraformReconciler) updateRunStatus(ctx context.Context, run *v1alpha1
 		r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, status, false)
 	}
 
+	if status == v1alpha1.RunCompleted || status == v1alpha1.RunDestroyed {
+		run.Status.CompletionTime = time.Now().Format(dateFormat)
+	}
+
 	if err := r.Status().Update(ctx, run); err != nil {
 		r.Log.Error(err, "failed to update status")
 	}
@@ -82,7 +86,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 		return ctrl.Result{}, err
 	}
 
-	t, err := time.Parse(dateFormat, run.Status.StartedTime)
+	startTime, err := time.Parse(dateFormat, run.Status.StartedTime)
 
 	if err != nil {
 		r.Log.Error(err, "failed to parse status started at to time")
@@ -91,7 +95,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 	defer r.MetricsRecorder.RecordDuration(
 		run.Name,
 		run.Namespace,
-		t,
+		startTime,
 	)
 
 	// job hasn't started
