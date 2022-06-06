@@ -26,6 +26,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -67,6 +68,23 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
+	}
+
+	if !controllerutil.ContainsFinalizer(run, v1alpha1.TerraformFinalizer) {
+		patch := client.MergeFrom(run.DeepCopy())
+
+		controllerutil.AddFinalizer(run, v1alpha1.TerraformFinalizer)
+
+		if err := r.Patch(ctx, run, patch); err != nil {
+			r.Log.Error(err, "unable to register finalizer")
+
+			return ctrl.Result{}, err
+		}
+	}
+
+	// Examine if the object is under deletion
+	if !run.ObjectMeta.DeletionTimestamp.IsZero() {
+		return r.handleRunDelete(run)
 	}
 
 	if run.IsSubmitted() || run.IsWaiting() {

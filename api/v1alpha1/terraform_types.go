@@ -25,6 +25,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+// TerraformFinalizer is the finalizer name
+const TerraformFinalizer string = "finalizers.terraform-operator.io"
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -108,6 +111,7 @@ const (
 	RunDestroyed            TerraformRunStatus = "Destroyed"
 	RunFailed               TerraformRunStatus = "Failed"
 	RunWaitingForDependency TerraformRunStatus = "WaitingForDependency"
+	RunDeleted              TerraformRunStatus = "Deleted"
 )
 
 // PreviousRunStatus stores the previous workflows/runs information
