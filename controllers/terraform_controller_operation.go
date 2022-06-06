@@ -79,9 +79,15 @@ func (r *TerraformReconciler) handleRunUpdate(ctx context.Context, run *v1alpha1
 	return r.handleRunCreate(ctx, run, namespacedName)
 }
 
-func (r *TerraformReconciler) handleRunDelete(run *v1alpha1.Terraform) (ctrl.Result, error) {
+func (r *TerraformReconciler) handleRunDelete(ctx context.Context, run *v1alpha1.Terraform) (ctrl.Result, error) {
+	r.Log.Info("Terraform run is being deleted")
+
 	r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, v1alpha1.RunDeleted)
 	controllerutil.RemoveFinalizer(run, v1alpha1.TerraformFinalizer)
+
+	if err := r.Update(ctx, run); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }

@@ -84,7 +84,7 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Examine if the object is under deletion
 	if !run.ObjectMeta.DeletionTimestamp.IsZero() {
-		return r.handleRunDelete(run)
+		return r.handleRunDelete(ctx, run)
 	}
 
 	if run.IsSubmitted() || run.IsWaiting() {
