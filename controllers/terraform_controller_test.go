@@ -55,6 +55,14 @@ var _ = Describe("Terraform Controller", func() {
 			// Create
 			Expect(k8sClient.Create(context.Background(), created)).Should(Succeed())
 
+			By("expect finalizer to be added")
+			Eventually(func() []string {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), key, r)
+
+				return r.Finalizers
+			}, timeout, interval).Should(Equal([]string{v1alpha1.TerraformFinalizer}))
+
 			Eventually(func() string {
 				r := &v1alpha1.Terraform{}
 				k8sClient.Get(context.Background(), key, r)

@@ -10,7 +10,7 @@ import (
 // RecorderInterface is an interface that holds the functions used by the recorder struct
 type RecorderInterface interface {
 	RecordTotal(name string, namespace string)
-	RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus, deleted bool)
+	RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus)
 	RecordDuration(name string, namespace string, start time.Time)
 	Collectors() []prometheus.Collector
 }
@@ -67,8 +67,12 @@ func (r *Recorder) RecordTotal(name string, namespace string) {
 }
 
 // RecordStatus records the status for a given terraform workflow/run
-func (r *Recorder) RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus, deleted bool) {
+func (r *Recorder) RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus) {
 	var value float64
+
+	if status == v1alpha1.RunDeleted {
+		value = 1
+	}
 
 	r.statusGauge.WithLabelValues(name, namespace, string(status)).Set(value)
 }

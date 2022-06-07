@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/kuptan/terraform-operator/api/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -22,7 +24,7 @@ func (r *TerraformReconciler) updateRunStatus(ctx context.Context, run *v1alpha1
 	run.Status.RunStatus = status
 
 	if status != v1alpha1.RunStarted {
-		r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, status, false)
+		r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, status)
 	}
 
 	if status == v1alpha1.RunCompleted || status == v1alpha1.RunDestroyed {
@@ -75,6 +77,19 @@ func (r *TerraformReconciler) handleRunUpdate(ctx context.Context, run *v1alpha1
 	r.Recorder.Event(run, "Normal", "Updated", "Creating a new run job")
 
 	return r.handleRunCreate(ctx, run, namespacedName)
+}
+
+func (r *TerraformReconciler) handleRunDelete(ctx context.Context, run *v1alpha1.Terraform) (ctrl.Result, error) {
+	r.Log.Info("Terraform run is being deleted")
+
+	r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, v1alpha1.RunDeleted)
+	controllerutil.RemoveFinalizer(run, v1alpha1.TerraformFinalizer)
+
+	if err := r.Update(ctx, run); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
 }
 
 func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alpha1.Terraform) (ctrl.Result, error) {

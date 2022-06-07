@@ -56,7 +56,7 @@ type mockMetricsRecorder struct {
 }
 
 func (m *mockMetricsRecorder) RecordTotal(name string, namespace string) {}
-func (m *mockMetricsRecorder) RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus, deleted bool) {
+func (m *mockMetricsRecorder) RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus) {
 }
 func (m *mockMetricsRecorder) RecordDuration(name string, namespace string, start time.Time) {}
 
