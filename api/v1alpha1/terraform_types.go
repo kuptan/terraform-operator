@@ -209,7 +209,7 @@ type TerraformList struct {
 
 // IsSubmitted evaluates if the workflow/run is created for the first time
 func (t *Terraform) IsSubmitted() bool {
-	return t.Status.ObservedGeneration == 0 && t.Status.RunID == ""
+	return t.Status.RunID == ""
 }
 
 // IsStarted evaluates that the workflow/run is started
