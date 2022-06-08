@@ -84,7 +84,7 @@ var _ = Describe("TerraformRun", func() {
 			}
 
 			run2.SetRunID()
-			Expect(run2.Status.RunID).To(HaveLen(8))
+			Expect(run2.Status.RunID).ToNot(BeEmpty())
 
 			By("run is now in a Started state")
 			Expect(run2.IsSubmitted()).To(BeFalse())
