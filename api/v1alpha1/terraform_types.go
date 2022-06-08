@@ -244,7 +244,7 @@ func (t *Terraform) HasErrored() bool {
 
 // SetRunID sets a new value for the run ID
 func (t *Terraform) SetRunID() {
-	t.Status.RunID = random(8)
+	t.Status.RunID = random(6)
 }
 
 // GetOwnerReference returns the Kubernetes owner reference meta

@@ -30,12 +30,12 @@ func removeString(slice []string, s string) (result []string) {
 
 // generates a random alphanumeric based on the length provided
 func random(n int64) string {
-	var letters = []rune("123456790abcdefghijklmnopqrstuvwxyz")
+	var letters = []rune("abcdefghijklmnopqrstuvwxyz123456790")
 
 	b := make([]rune, n)
 
 	for i := range b {
-		generated, _ := rand.Int(rand.Reader, big.NewInt(n))
+		generated, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
 
 		b[i] = letters[generated.Int64()]
 	}
