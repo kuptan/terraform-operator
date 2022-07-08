@@ -51,3 +51,20 @@ func createConfigMapForModule(namespacedName types.NamespacedName, run *Terrafor
 
 	return configMap, nil
 }
+
+// deleteConfigMapByRun deletes the Kubernetes Job of the workflow/run
+func deleteConfigMapByRun(runName string, namespace string, runID string) error {
+	configMaps := kube.ClientSet.CoreV1().ConfigMaps(namespace)
+
+	resourceName := getUniqueResourceName(runName, runID)
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	if err := configMaps.Delete(context.Background(), resourceName, metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}

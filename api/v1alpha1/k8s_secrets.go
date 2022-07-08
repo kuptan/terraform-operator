@@ -35,3 +35,20 @@ func createSecretForOutputs(namespacedName types.NamespacedName, t *Terraform) (
 
 	return secret, nil
 }
+
+// deleteSecretByRun deletes the Kubernetes Job of the workflow/run
+func deleteSecretByRun(runName string, namespace string, runID string) error {
+	secrets := kube.ClientSet.CoreV1().Secrets(namespace)
+
+	resourceName := getUniqueResourceName(runName, runID)
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	if err := secrets.Delete(context.Background(), resourceName, metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}

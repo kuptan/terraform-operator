@@ -130,7 +130,7 @@ var _ = Describe("TerraformRun", func() {
 
 			err = run.DeleteAfterCompletion()
 
-			Expect(err).ToNot(HaveOccurred(), "run job could not be deleted")
+			Expect(err).ToNot(HaveOccurred(), "failed to clean up resources")
 		})
 
 		It("should get the owner preference", func() {

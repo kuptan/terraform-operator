@@ -13,6 +13,8 @@ spec:
     kind: Terraform
     listKind: TerraformList
     plural: terraforms
+    shortNames:
+    - tf
     singular: terraform
   scope: Namespaced
   versions:
@@ -3323,6 +3325,8 @@ spec:
                 type: integer
               outputSecretName:
                 type: string
+              previousRunId:
+                type: string
               runStatus:
                 description: TerraformRunStatus is the status of the workflow/run
                 type: string
@@ -3331,6 +3335,7 @@ spec:
             required:
             - currentRunId
             - observedGeneration
+            - previousRunId
             - runStatus
             type: object
         type: object

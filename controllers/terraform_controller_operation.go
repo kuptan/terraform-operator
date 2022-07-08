@@ -55,6 +55,12 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 
 	run.SetRunID()
 
+	r.Log.Info("cleaning up old resources if exist")
+
+	if err = run.CleanupResources(); err != nil {
+		r.Log.Error(err, "failed to cleanup resources")
+	}
+
 	setVariablesFromDependencies(run, dependencies)
 
 	job, err := run.CreateTerraformRun(namespacedName)
@@ -131,7 +137,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 
 	// job is successful
 	if job.Status.Succeeded > 0 {
-		r.Log.Info("terraform run job completed successfully")
+		r.Log.Info("terraform run job completed successfully, performing a cleanup on resources")
 
 		if run.Spec.DeleteCompletedJobs {
 			r.Log.Info("deleting completed job")

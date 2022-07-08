@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -57,6 +58,17 @@ var _ = Describe("Kubernetes Secrets", func() {
 
 			Expect(err).To(HaveOccurred())
 			Expect(secret).To(BeNil())
+		})
+
+		It("should delete the resource for run successfully", func() {
+			err := deleteSecretByRun(key.Name, key.Namespace, run.Status.RunID)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("should return an error if the secret does not exist", func() {
+			err := deleteSecretByRun(key.Name, key.Namespace, run.Status.RunID)
+			Expect(err).To(HaveOccurred())
+			Expect(errors.IsNotFound(err)).To(BeTrue())
 		})
 	})
 })
