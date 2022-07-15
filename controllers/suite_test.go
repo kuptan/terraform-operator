@@ -112,7 +112,10 @@ var _ = BeforeSuite(func() {
 		Recorder:        k8sManager.GetEventRecorderFor("terraform-controller"),
 		Log:             ctrl.Log.WithName("controllers").WithName("TerraformController"),
 		MetricsRecorder: mockedMetricsRecorder,
-	}).SetupWithManager(k8sManager)
+	}).SetupWithManager(k8sManager, TerraformReconcilerOptions{
+		RequeueJobWatchInterval:   10 * time.Second,
+		RequeueDependencyInterval: 20 * time.Second,
+	})
 
 	Expect(err).NotTo(HaveOccurred(), "failed to setup controller in test")
 

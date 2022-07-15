@@ -18,7 +18,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -41,8 +43,10 @@ import (
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme            = runtime.NewScheme()
+	setupLog          = ctrl.Log.WithName("setup")
+	requeueDependency time.Duration
+	requeueJobWatch   time.Duration
 )
 
 func init() {
@@ -58,6 +62,8 @@ func main() {
 	var probeAddr string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.DurationVar(&requeueJobWatch, "requeue-job-watch", 10*time.Second, "The interval at which job status is reevaluated after a workflow is submitted.")
+	flag.DurationVar(&requeueDependency, "requeue-dependency", 20*time.Second, "The interval at which dependencies are reevaluated.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -86,13 +92,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	setupLog.Info(fmt.Sprintf("requeue dependency interval: %s", requeueDependency))
+	setupLog.Info(fmt.Sprintf("requeue job watch interval: %s", requeueJobWatch))
+
 	if err = (&controllers.TerraformReconciler{
 		Client:          mgr.GetClient(),
 		Scheme:          mgr.GetScheme(),
 		Recorder:        mgr.GetEventRecorderFor("terraform-controller"),
 		MetricsRecorder: metricsRecorder,
 		Log:             ctrl.Log.WithName("controllers").WithName("TerraformController"),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManager(mgr, controllers.TerraformReconcilerOptions{
+		RequeueDependencyInterval: requeueDependency,
+		RequeueJobWatchInterval:   requeueJobWatch,
+	}); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Terraform")
 		os.Exit(1)
 	}

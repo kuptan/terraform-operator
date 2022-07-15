@@ -39,10 +39,18 @@ import (
 // TerraformReconciler reconciles a Terraform object
 type TerraformReconciler struct {
 	client.Client
-	Scheme          *runtime.Scheme
-	Recorder        record.EventRecorder
-	MetricsRecorder metrics.RecorderInterface
-	Log             logr.Logger
+	Scheme            *runtime.Scheme
+	Recorder          record.EventRecorder
+	MetricsRecorder   metrics.RecorderInterface
+	Log               logr.Logger
+	requeueDependency time.Duration
+	requeueJobWatch   time.Duration
+}
+
+// TerraformReconcilerOptions holds additional options
+type TerraformReconcilerOptions struct {
+	RequeueDependencyInterval time.Duration
+	RequeueJobWatchInterval   time.Duration
 }
 
 //+kubebuilder:rbac:groups=run.terraform-operator.io,resources=terraforms,verbs=get;list;watch;create;update;patch;delete
@@ -145,7 +153,10 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *TerraformReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *TerraformReconciler) SetupWithManager(mgr ctrl.Manager, opts TerraformReconcilerOptions) error {
+	r.requeueDependency = opts.RequeueDependencyInterval
+	r.requeueJobWatch = opts.RequeueJobWatchInterval
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Terraform{}).
 		Owns(&batchv1.Job{}).
