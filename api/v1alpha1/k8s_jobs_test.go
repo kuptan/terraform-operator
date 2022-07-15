@@ -84,11 +84,11 @@ var _ = Describe("Kubernetes Jobs", func() {
 		})
 
 		It("should contain an environment variable for Terraform workspace", func() {
-			var envVar *corev1.EnvVar
+			var envVar corev1.EnvVar
 
 			for _, e := range job.Spec.Template.Spec.Containers[0].Env {
 				if e.Name == "TERRAFORM_WORKSPACE" {
-					envVar = &e
+					envVar = e
 					break
 				}
 			}
