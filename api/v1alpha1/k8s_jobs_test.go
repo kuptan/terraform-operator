@@ -13,7 +13,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Kubernetes RBAC", func() {
+var _ = Describe("Kubernetes Jobs", func() {
 	BeforeEach(func() {
 		// Add any setup steps that needs to be executed before each test
 	})
@@ -32,6 +32,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 			},
 			Spec: TerraformSpec{
 				TerraformVersion: "1.0.2",
+				Workspace:        "dev",
 				Module: Module{
 					Source:  "IbraheemAlSaady/test/module",
 					Version: "0.0.1",
@@ -80,6 +81,20 @@ var _ = Describe("Kubernetes RBAC", func() {
 			Expect(sshVolume).ToNot(BeNil())
 			Expect(sshVolume.Name).To(Equal(gitSSHKeyVolumeName))
 			Expect(sshVolume.VolumeSource.Secret.SecretName).To(Equal(run.Spec.GitSSHKey.ValueFrom.Secret.SecretName))
+		})
+
+		It("should contain an environment variable for Terraform workspace", func() {
+			var envVar corev1.EnvVar
+
+			for _, e := range job.Spec.Template.Spec.Containers[0].Env {
+				if e.Name == "TERRAFORM_WORKSPACE" {
+					envVar = e
+					break
+				}
+			}
+
+			Expect(envVar).ToNot(BeNil())
+			Expect(envVar.Value).To(Equal(run.Spec.Workspace))
 		})
 	})
 

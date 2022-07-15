@@ -13,10 +13,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var _ = Describe("Terraform Controller", func() {
-	const timeout = time.Second * 30
-	const interval = time.Second * 1
+const timeout = time.Second * 30
+const interval = time.Second * 1
 
+var _ = Describe("Terraform Controller", func() {
 	BeforeEach(func() {
 		// Add any setup steps that needs to be executed before each test
 	})
@@ -291,7 +291,7 @@ var _ = Describe("Terraform Controller", func() {
 			},
 		}
 
-		It("should create runs successfully with the correct dependency flow", func() {
+		It("should create two successfully runs with the correct dependency flow", func() {
 			// Create
 			Expect(k8sClient.Create(context.Background(), run1)).Should(Succeed())
 
@@ -307,6 +307,24 @@ var _ = Describe("Terraform Controller", func() {
 			Expect(k8sClient.Create(context.Background(), run2)).Should(Succeed())
 
 			By("evaluating run2 status")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run2Key, r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunWaitingForDependency))
+
+			By("expect run1 status to be running")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run1Key, r)
+
+				makeRunJobRunning(r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunRunning))
+
+			By("expect run2 status to be waiting")
 			Eventually(func() v1alpha1.TerraformRunStatus {
 				r := &v1alpha1.Terraform{}
 				k8sClient.Get(context.Background(), run2Key, r)
@@ -341,6 +359,94 @@ var _ = Describe("Terraform Controller", func() {
 
 				return r.Status.RunStatus
 			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
+		})
+
+		It("should update run1 without affecting run2", func() {
+			updated := &v1alpha1.Terraform{}
+			Expect(k8sClient.Get(context.Background(), run1Key, updated)).Should(Succeed())
+
+			updated.Spec.Workspace = "dev"
+			Expect(k8sClient.Update(context.Background(), updated)).Should(Succeed())
+
+			By("expect run1 status to be completed")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run1Key, r)
+
+				makeRunJobSucceed(r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
+
+			By("expect run2 status to be completed")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run2Key, r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
+		})
+
+		It("should mark run1 status to failed", func() {
+			updated := &v1alpha1.Terraform{}
+			Expect(k8sClient.Get(context.Background(), run1Key, updated)).Should(Succeed())
+
+			updated.Spec.Workspace = "dev2"
+			Expect(k8sClient.Update(context.Background(), updated)).Should(Succeed())
+
+			By("expect run1 status to be failed")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run1Key, r)
+
+				makeRunJobFail(r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunFailed))
+		})
+
+		It("should mark run2 as WaitingForDependency since run1 failed", func() {
+			updated := &v1alpha1.Terraform{}
+			Expect(k8sClient.Get(context.Background(), run2Key, updated)).Should(Succeed())
+
+			updated.Spec.Workspace = "dev2"
+			Expect(k8sClient.Update(context.Background(), updated)).Should(Succeed())
+
+			By("expect run2 status to be WaitingForDependency")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run2Key, r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunWaitingForDependency))
+		})
+
+		It("should mark run1 as successful", func() {
+			updated := &v1alpha1.Terraform{}
+			Expect(k8sClient.Get(context.Background(), run1Key, updated)).Should(Succeed())
+
+			updated.Spec.Workspace = "dev3"
+			Expect(k8sClient.Update(context.Background(), updated)).Should(Succeed())
+
+			By("expect run1 status to be completed")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run1Key, r)
+
+				makeRunJobSucceed(r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
+
+			By("expect run2 status to be Running")
+			Eventually(func() v1alpha1.TerraformRunStatus {
+				r := &v1alpha1.Terraform{}
+				k8sClient.Get(context.Background(), run2Key, r)
+
+				makeRunJobRunning(r)
+
+				return r.Status.RunStatus
+			}, timeout, interval).Should(Equal(v1alpha1.RunRunning))
 		})
 	})
 })
