@@ -141,6 +141,27 @@ var _ = Describe("Terraform Controller", func() {
 			Expect(jobs.Items).To(HaveLen(1))
 		})
 
+		It("should cleanup old resources", func() {
+			run := &v1alpha1.Terraform{}
+			Expect(k8sClient.Get(context.Background(), key, run)).Should(Succeed())
+			Expect(run.Status.PreviousRunID).ToNot(BeEmpty())
+
+			labelJob := labels.SelectorFromSet(labels.Set(map[string]string{"terraformRunName": run.Name}))
+			listPodOptions := metav1.ListOptions{
+				LabelSelector: labelJob.String(),
+			}
+
+			jobs, err := kube.ClientSet.BatchV1().Jobs(run.Namespace).List(context.Background(), listPodOptions)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(jobs.Items).To(HaveLen(1))
+
+			configMaps, err := kube.ClientSet.CoreV1().ConfigMaps(run.Namespace).List(context.Background(), listPodOptions)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(configMaps.Items).To(HaveLen(1))
+		})
+
 		It("should have a failed status if job failed", func() {
 			updated := &v1alpha1.Terraform{}
 			Expect(k8sClient.Get(context.Background(), key, updated)).Should(Succeed())

@@ -50,5 +50,10 @@ var _ = Describe("Helpers", func() {
 			name := getUniqueResourceName("foo", "1234")
 			Expect(name).To(Equal("foo-1234"))
 		})
+
+		It("should return the the name of the secret output", func() {
+			name := getOutputSecretname("foo")
+			Expect(name).To(Equal("foo-outputs"))
+		})
 	})
 })

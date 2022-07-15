@@ -320,6 +320,11 @@ func (t *Terraform) DeleteAfterCompletion() error {
 	return nil
 }
 
+// getOutputSecretName returns the secret name of the Terraform outputs
+func (t *Terraform) GetOutputSecretName() string {
+	return getOutputSecretname(t.Name)
+}
+
 // CleanupResources cleans up old resources (secrets & configmaps)
 func (t *Terraform) CleanupResources() error {
 	previousRunID := t.Status.PreviousRunID
@@ -330,13 +335,6 @@ func (t *Terraform) CleanupResources() error {
 
 	// delete the older job
 	if err := deleteJobByRun(t.Name, t.Namespace, previousRunID); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-	}
-
-	// delete the older output secret
-	if err := deleteSecretByRun(t.Name, t.Namespace, previousRunID); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}

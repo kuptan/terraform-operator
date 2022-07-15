@@ -1,10 +1,12 @@
 package v1alpha1
 
 import (
-	"k8s.io/apimachinery/pkg/api/errors"
+	"context"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/kuptan/terraform-operator/internal/kube"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -43,32 +45,45 @@ var _ = Describe("Kubernetes Secrets", func() {
 			},
 		}
 
+		expectedSecretName := key.Name + "-outputs"
+
 		It("should create the secret successfully", func() {
 			secret, err := createSecretForOutputs(key, run)
 
-			expectedName := "bar-1234"
+			Expect(err).ToNot(HaveOccurred())
+			Expect(secret).ToNot(BeNil())
+			Expect(secret.Name).To(Equal(expectedSecretName))
+		})
+
+		It("should retutrn the secret if exist", func() {
+			secret, err := isSecretExist(expectedSecretName, key.Namespace)
 
 			Expect(err).ToNot(HaveOccurred())
 			Expect(secret).ToNot(BeNil())
-			Expect(secret.Name).To(Equal(expectedName))
+			Expect(secret.Name).To(Equal(expectedSecretName))
 		})
 
-		It("should fail to create a secret that already exist", func() {
+		It("should not fail to create a secret that already exist", func() {
 			secret, err := createSecretForOutputs(key, run)
 
-			Expect(err).To(HaveOccurred())
-			Expect(secret).To(BeNil())
-		})
-
-		It("should delete the resource for run successfully", func() {
-			err := deleteSecretByRun(key.Name, key.Namespace, run.Status.RunID)
 			Expect(err).ToNot(HaveOccurred())
+			Expect(secret).ToNot(BeNil())
+			Expect(secret.Name).To(Equal(expectedSecretName))
 		})
 
-		It("should return an error if the secret does not exist", func() {
-			err := deleteSecretByRun(key.Name, key.Namespace, run.Status.RunID)
-			Expect(err).To(HaveOccurred())
-			Expect(errors.IsNotFound(err)).To(BeTrue())
+		It("should return nils if a secret was not found", func() {
+			secrets := kube.ClientSet.CoreV1().Secrets(key.Namespace)
+
+			deletePolicy := metav1.DeletePropagationForeground
+
+			secrets.Delete(context.Background(), expectedSecretName, metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			})
+
+			secret, err := isSecretExist(expectedSecretName, key.Namespace)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(secret).To(BeNil())
 		})
 	})
 })

@@ -63,9 +63,12 @@ func truncateResourceName(s string, i int) string {
 	return name
 }
 
-// creates a name for the terraform Run job
+// getUniqueResourceName returns a unique name for the terraform Run job
 func getUniqueResourceName(name string, runID string) string {
-	// return fmt.Sprintf("tf-apply-%s-%s", name, runId)
-
 	return fmt.Sprintf("%s-%s", truncateResourceName(name, 220), runID)
+}
+
+// getOutputSecretname returns a unique name for the terraform Run job
+func getOutputSecretname(name string) string {
+	return fmt.Sprintf("%s-outputs", truncateResourceName(name, 220))
 }
