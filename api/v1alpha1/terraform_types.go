@@ -189,6 +189,7 @@ type TerraformStatus struct {
 //+kubebuilder:subresource:status
 
 // Terraform is the Schema for the terraforms API
+// +kubebuilder:resource:shortName=tf,path=terraforms
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.runStatus"
 // +kubebuilder:printcolumn:name="Secret",type="string",JSONPath=".status.outputSecretName"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
