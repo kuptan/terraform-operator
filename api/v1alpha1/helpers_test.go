@@ -55,5 +55,11 @@ var _ = Describe("Helpers", func() {
 			name := getOutputSecretname("foo")
 			Expect(name).To(Equal("foo-outputs"))
 		})
+
+		It("should return a truncated value if length of the name is larger than allowed", func() {
+			name := truncateResourceName("my-value-for-the-name", 15)
+			// should trim from the right and keep the string to 15 characters
+			Expect(name).To(Equal("my-value-for-th"))
+		})
 	})
 })
