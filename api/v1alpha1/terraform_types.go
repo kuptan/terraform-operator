@@ -320,7 +320,7 @@ func (t *Terraform) DeleteAfterCompletion() error {
 	return nil
 }
 
-// getOutputSecretName returns the secret name of the Terraform outputs
+// GetOutputSecretName returns the secret name of the Terraform outputs
 func (t *Terraform) GetOutputSecretName() string {
 	return getOutputSecretname(t.Name)
 }
