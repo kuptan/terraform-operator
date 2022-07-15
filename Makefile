@@ -71,7 +71,7 @@ build: generate fmt vet ## Build manager binary.
 
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.
-	go run ./main.go
+	go run ./main.go --requeue-dependency=5s --requeue-job-watch=5s
 
 .PHONY: docker-build
 docker-build: test ## Build docker image with the manager.

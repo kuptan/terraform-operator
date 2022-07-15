@@ -15,9 +15,7 @@ import (
 )
 
 var (
-	requeueJobWatch   time.Duration = 10 * time.Second
-	requeueDependency time.Duration = 20 * time.Second
-	dateFormat        string        = "2006-01-02 15:04:05"
+	dateFormat string = "2006-01-02 15:04:05"
 )
 
 func (r *TerraformReconciler) updateRunStatus(ctx context.Context, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
@@ -49,7 +47,7 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 		}
 
 		return ctrl.Result{
-			RequeueAfter: requeueDependency,
+			RequeueAfter: r.requeueDependency,
 		}, nil
 	}
 
@@ -121,7 +119,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 
 	// job hasn't started
 	if job.Status.Active == 0 && job.Status.Succeeded == 0 && job.Status.Failed == 0 {
-		return ctrl.Result{RequeueAfter: requeueJobWatch}, nil
+		return ctrl.Result{RequeueAfter: r.requeueJobWatch}, nil
 	}
 
 	// job is still running
@@ -132,7 +130,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 			r.Recorder.Event(run, "Normal", "Running", fmt.Sprintf("Run(%s) waiting for run job to finish", run.Status.RunID))
 		}
 
-		return ctrl.Result{RequeueAfter: requeueJobWatch}, nil
+		return ctrl.Result{RequeueAfter: r.requeueJobWatch}, nil
 	}
 
 	// job is successful
