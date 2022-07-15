@@ -5,9 +5,11 @@ import (
 	"time"
 
 	"github.com/kuptan/terraform-operator/api/v1alpha1"
+	"github.com/kuptan/terraform-operator/internal/kube"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -126,6 +128,38 @@ var _ = Describe("Terraform Controller", func() {
 
 				return r.Status.RunStatus
 			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
+
+			// check if resources were cleaned up
+			labelJob := labels.SelectorFromSet(labels.Set(map[string]string{"terraformRunName": updated.Name}))
+			listPodOptions := metav1.ListOptions{
+				LabelSelector: labelJob.String(),
+			}
+
+			jobs, err := kube.ClientSet.BatchV1().Jobs(updated.Namespace).List(context.Background(), listPodOptions)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(jobs.Items).To(HaveLen(1))
+		})
+
+		It("should cleanup old resources", func() {
+			run := &v1alpha1.Terraform{}
+			Expect(k8sClient.Get(context.Background(), key, run)).Should(Succeed())
+			Expect(run.Status.PreviousRunID).ToNot(BeEmpty())
+
+			labelJob := labels.SelectorFromSet(labels.Set(map[string]string{"terraformRunName": run.Name}))
+			listPodOptions := metav1.ListOptions{
+				LabelSelector: labelJob.String(),
+			}
+
+			jobs, err := kube.ClientSet.BatchV1().Jobs(run.Namespace).List(context.Background(), listPodOptions)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(jobs.Items).To(HaveLen(1))
+
+			configMaps, err := kube.ClientSet.CoreV1().ConfigMaps(run.Namespace).List(context.Background(), listPodOptions)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(configMaps.Items).To(HaveLen(1))
 		})
 
 		It("should have a failed status if job failed", func() {
@@ -308,6 +342,5 @@ var _ = Describe("Terraform Controller", func() {
 				return r.Status.RunStatus
 			}, timeout, interval).Should(Equal(v1alpha1.RunCompleted))
 		})
-
 	})
 })

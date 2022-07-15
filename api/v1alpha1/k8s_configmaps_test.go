@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -50,6 +51,19 @@ var _ = Describe("Kubernetes ConfigMaps", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(cfg).ToNot(BeNil())
 			Expect(cfg.Name).To(Equal(expectedName))
+		})
+
+		It("should delete the configmap successfully", func() {
+			err := deleteConfigMapByRun(key.Name, key.Namespace, run.Status.RunID)
+
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("should return an error if the configmap does not exist", func() {
+			err := deleteConfigMapByRun(key.Name, key.Namespace, run.Status.RunID)
+
+			Expect(err).To(HaveOccurred())
+			Expect(errors.IsNotFound(err)).To(BeTrue())
 		})
 	})
 })

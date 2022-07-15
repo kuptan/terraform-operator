@@ -21,6 +21,7 @@ import (
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -175,6 +176,7 @@ type TerraformStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	RunID              string             `json:"currentRunId"`
+	PreviousRunID      string             `json:"previousRunId,omitempty"`
 	OutputSecretName   string             `json:"outputSecretName,omitempty"`
 	ObservedGeneration int64              `json:"observedGeneration"`
 	RunStatus          TerraformRunStatus `json:"runStatus"`
@@ -244,6 +246,9 @@ func (t *Terraform) HasErrored() bool {
 
 // SetRunID sets a new value for the run ID
 func (t *Terraform) SetRunID() {
+	if t.Status.RunID != "" {
+		t.Status.PreviousRunID = t.Status.RunID
+	}
 	t.Status.RunID = random(6)
 }
 
@@ -309,6 +314,36 @@ func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*ba
 func (t *Terraform) DeleteAfterCompletion() error {
 	if err := deleteJobByRun(t.Name, t.Namespace, t.Status.RunID); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// GetOutputSecretName returns the secret name of the Terraform outputs
+func (t *Terraform) GetOutputSecretName() string {
+	return getOutputSecretname(t.Name)
+}
+
+// CleanupResources cleans up old resources (secrets & configmaps)
+func (t *Terraform) CleanupResources() error {
+	previousRunID := t.Status.PreviousRunID
+
+	if previousRunID == "" {
+		return nil
+	}
+
+	// delete the older job
+	if err := deleteJobByRun(t.Name, t.Namespace, previousRunID); err != nil {
+		if !errors.IsNotFound(err) {
+			return err
+		}
+	}
+
+	// delete the older configmap that holds the module
+	if err := deleteConfigMapByRun(t.Name, t.Namespace, previousRunID); err != nil {
+		if !errors.IsNotFound(err) {
+			return err
+		}
 	}
 
 	return nil

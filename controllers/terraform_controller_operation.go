@@ -55,9 +55,11 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 
 	run.SetRunID()
 
+	r.Log.Info("cleaning up old resources if exist")
+
 	setVariablesFromDependencies(run, dependencies)
 
-	job, err := run.CreateTerraformRun(namespacedName)
+	_, err = run.CreateTerraformRun(namespacedName)
 
 	if err != nil {
 		r.Log.Error(err, "failed create a terraform run")
@@ -67,7 +69,11 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 		return ctrl.Result{}, err
 	}
 
-	run.Status.OutputSecretName = job.ObjectMeta.Name
+	if err = run.CleanupResources(); err != nil {
+		r.Log.Error(err, "failed to cleanup resources")
+	}
+
+	run.Status.OutputSecretName = run.GetOutputSecretName()
 	r.updateRunStatus(ctx, run, v1alpha1.RunStarted)
 
 	return ctrl.Result{}, nil
@@ -131,7 +137,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 
 	// job is successful
 	if job.Status.Succeeded > 0 {
-		r.Log.Info("terraform run job completed successfully")
+		r.Log.Info("terraform run job completed successfully, performing a cleanup on resources")
 
 		if run.Spec.DeleteCompletedJobs {
 			r.Log.Info("deleting completed job")

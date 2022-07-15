@@ -7,8 +7,7 @@ spec:
 
   module:
     source: IbraheemAlSaady/test/module
-    version: 0.0.3
-
+    
   variables:
     - key: length
       value: "4"

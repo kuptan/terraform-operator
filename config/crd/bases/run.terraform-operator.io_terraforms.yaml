@@ -3323,6 +3323,8 @@ spec:
                 type: integer
               outputSecretName:
                 type: string
+              previousRunId:
+                type: string
               runStatus:
                 description: TerraformRunStatus is the status of the workflow/run
                 type: string

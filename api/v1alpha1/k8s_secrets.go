@@ -5,15 +5,41 @@ import (
 
 	"github.com/kuptan/terraform-operator/internal/kube"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
+// isSecretExist checks whether a Secret exist
+func isSecretExist(name string, namespace string) (*corev1.Secret, error) {
+	secret, err := kube.ClientSet.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return secret, nil
+}
+
 // createSecretForOutputs creates a secret to store the the Terraform output of the workflow/run
 func createSecretForOutputs(namespacedName types.NamespacedName, t *Terraform) (*corev1.Secret, error) {
-	secrets := kube.ClientSet.CoreV1().Secrets(namespacedName.Namespace)
+	secretName := getOutputSecretname(namespacedName.Name)
 
-	secretName := getUniqueResourceName(namespacedName.Name, t.Status.RunID)
+	exist, err := isSecretExist(secretName, namespacedName.Namespace)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if exist != nil {
+		return exist, nil
+	}
+
+	secrets := kube.ClientSet.CoreV1().Secrets(namespacedName.Namespace)
 
 	obj := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

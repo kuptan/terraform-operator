@@ -130,7 +130,7 @@ var _ = Describe("TerraformRun", func() {
 
 			err = run.DeleteAfterCompletion()
 
-			Expect(err).ToNot(HaveOccurred(), "run job could not be deleted")
+			Expect(err).ToNot(HaveOccurred(), "failed to clean up resources")
 		})
 
 		It("should get the owner preference", func() {
@@ -139,6 +139,28 @@ var _ = Describe("TerraformRun", func() {
 			owner := run.GetOwnerReference()
 
 			Expect(owner).ToNot(BeNil())
+		})
+
+		It("should handle resource cleanup when there is no previous run", func() {
+			run := &Terraform{
+				Status: TerraformStatus{
+					RunID:         "",
+					PreviousRunID: "",
+				},
+			}
+
+			Expect(run.CleanupResources()).ToNot(HaveOccurred())
+		})
+
+		It("should handle resource cleanup when previous run exist", func() {
+			run := &Terraform{
+				Status: TerraformStatus{
+					RunID:         "1234",
+					PreviousRunID: "612faw",
+				},
+			}
+
+			Expect(run.CleanupResources()).ToNot(HaveOccurred())
 		})
 	})
 
@@ -192,25 +214,6 @@ var _ = Describe("TerraformRun", func() {
 			Expect(job).To(BeNil())
 
 			kube.ClientSet.CoreV1().ConfigMaps("default").Delete(context.Background(), name, metav1.DeleteOptions{})
-		})
-
-		It("should fail to create a run due to existing secret", func() {
-			secret := corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: "default",
-				},
-				Data: make(map[string][]byte),
-			}
-
-			kube.ClientSet.CoreV1().Secrets("default").Create(context.Background(), &secret, metav1.CreateOptions{})
-
-			job, err := run.CreateTerraformRun(key)
-
-			Expect(err).To(HaveOccurred())
-			Expect(job).To(BeNil())
-
-			kube.ClientSet.CoreV1().Secrets("default").Delete(context.Background(), name, metav1.DeleteOptions{})
 		})
 
 		It("should fail to create a run due to existing job", func() {
