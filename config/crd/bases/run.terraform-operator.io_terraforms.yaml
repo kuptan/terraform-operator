@@ -13,8 +13,6 @@ spec:
     kind: Terraform
     listKind: TerraformList
     plural: terraforms
-    shortNames:
-    - tf
     singular: terraform
   scope: Namespaced
   versions:
@@ -3335,7 +3333,6 @@ spec:
             required:
             - currentRunId
             - observedGeneration
-            - previousRunId
             - runStatus
             type: object
         type: object

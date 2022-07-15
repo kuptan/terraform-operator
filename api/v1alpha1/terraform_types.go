@@ -176,7 +176,7 @@ type TerraformStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	RunID              string             `json:"currentRunId"`
-	PreviousRunID      string             `json:"previousRunId"`
+	PreviousRunID      string             `json:"previousRunId,omitempty"`
 	OutputSecretName   string             `json:"outputSecretName,omitempty"`
 	ObservedGeneration int64              `json:"observedGeneration"`
 	RunStatus          TerraformRunStatus `json:"runStatus"`
@@ -189,7 +189,6 @@ type TerraformStatus struct {
 //+kubebuilder:subresource:status
 
 // Terraform is the Schema for the terraforms API
-// +kubebuilder:resource:shortName=tf,path=terraforms
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.runStatus"
 // +kubebuilder:printcolumn:name="Secret",type="string",JSONPath=".status.outputSecretName"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"

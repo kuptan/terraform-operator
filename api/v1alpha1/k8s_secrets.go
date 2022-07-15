@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kuptan/terraform-operator/internal/kube"
 	corev1 "k8s.io/api/core/v1"
@@ -37,7 +36,6 @@ func createSecretForOutputs(namespacedName types.NamespacedName, t *Terraform) (
 	}
 
 	if exist != nil {
-		fmt.Print("secret found here....")
 		return exist, nil
 	}
 
