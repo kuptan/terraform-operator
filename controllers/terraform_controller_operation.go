@@ -189,6 +189,10 @@ func (r *TerraformReconciler) checkDependencies(ctx context.Context, run v1alpha
 			return dependencies, fmt.Errorf("unable to get '%s' dependency: %w", dName, err)
 		}
 
+		if dRun.Generation != dRun.Status.ObservedGeneration {
+			return dependencies, fmt.Errorf("dependency '%s' is not ready", dName)
+		}
+
 		if dRun.Status.RunStatus != v1alpha1.RunCompleted {
 			return dependencies, fmt.Errorf("dependency '%s' is not ready", dName)
 		}
