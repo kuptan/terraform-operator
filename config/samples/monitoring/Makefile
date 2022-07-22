@@ -4,5 +4,6 @@ kubernetes:
 
 .PHONY: monitoring
 monitoring:
+	helm upgrade -i prometheus-stack prometheus-community/kube-prometheus-stack -f kube-prometheus-stack.yaml
 
 	sh create-svc.sh
