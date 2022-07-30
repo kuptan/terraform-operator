@@ -269,8 +269,9 @@ func setBackendCfgIfNotExist(run *Terraform) {
 		run.Spec.Backend = fmt.Sprintf(`backend "kubernetes" {
   secret_suffix     = "%s"
   in_cluster_config = true
+	namespace					= "%s"
 }
-`, run.ObjectMeta.Name)
+`, run.ObjectMeta.Name, run.ObjectMeta.Namespace)
 	}
 }
 
