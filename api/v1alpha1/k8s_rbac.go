@@ -102,11 +102,13 @@ func createRbacConfigIfNotExist(name string, namespace string) error {
 		return err
 	}
 
-	if !saExist && !roleBindingExist {
+	if !saExist {
 		if _, err := createServiceAccount(name, namespace); err != nil {
 			return err
 		}
+	}
 
+	if !roleBindingExist {
 		if _, err := createRoleBinding(name, namespace); err != nil {
 			return err
 		}
