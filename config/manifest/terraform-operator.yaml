@@ -100,6 +100,10 @@ rules:
     - events
   verbs:
     - '*'
+
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create", "update", "watch", "get"]
 ---
 # Source: terraform-operator/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -176,7 +180,7 @@ spec:
 
       containers:
         - name: terraform-operator
-          image: docker.io/kubechamp/terraform-operator:0.1.1
+          image: docker.io/kubechamp/terraform-operator:0.1.3
           imagePullPolicy: IfNotPresent
 
           securityContext:
@@ -196,3 +200,21 @@ spec:
               value: 0.0.4
             - name: KNOWN_HOSTS_CONFIGMAP_NAME
               value: terraform-operator-known-hosts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: terraform-operator-metrics
+  labels:
+    app: terraform-operator
+  namespace: "default"
+  annotations:
+    null
+spec:
+  type: ClusterIP
+  ports:
+    - name: http-metrics
+      port: 8080
+      targetPort: http-metrics
+  selector:
+    app: terraform-operator
