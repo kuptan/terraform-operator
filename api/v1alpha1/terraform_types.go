@@ -109,7 +109,6 @@ const (
 	RunStarted              TerraformRunStatus = "Started"
 	RunRunning              TerraformRunStatus = "Running"
 	RunCompleted            TerraformRunStatus = "Completed"
-	RunDestroyed            TerraformRunStatus = "Destroyed"
 	RunFailed               TerraformRunStatus = "Failed"
 	RunWaitingForDependency TerraformRunStatus = "WaitingForDependency"
 	RunDeleted              TerraformRunStatus = "Deleted"

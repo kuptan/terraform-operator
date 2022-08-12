@@ -59,8 +59,8 @@ var _ = Describe("Metrics Recorder", func() {
 				Expect(metricFamilies[0].Metric[0].Gauge.Value).To(Equal(&value))
 			})
 
-			It("should record the deleted status", func() {
-				rec.RecordStatus(name, namespace, v1alpha1.RunDeleted)
+			It("should record the failed status", func() {
+				rec.RecordStatus(name, namespace, v1alpha1.RunFailed)
 
 				var (
 					value      float64 = 1.0
@@ -75,6 +75,24 @@ var _ = Describe("Metrics Recorder", func() {
 				Expect(metricFamilies[0].Metric).To(HaveLen(2))
 				Expect(metricFamilies[0].Metric[1].Gauge).ToNot(BeNil())
 				Expect(metricFamilies[0].Metric[1].Gauge.Value).To(Equal(&value))
+			})
+
+			It("should record the destroyed status", func() {
+				rec.RecordStatus(name, namespace, v1alpha1.RunFailed)
+
+				var (
+					value      float64 = -1.0
+					metricName string  = "tfo_workflow_status"
+				)
+
+				metricFamilies, err := reg.Gather()
+
+				Expect(err).ToNot(HaveOccurred())
+				Expect(metricFamilies).To(HaveLen(2))
+				Expect(metricFamilies[0].Name).To(Equal(&metricName))
+				Expect(metricFamilies[0].Metric).To(HaveLen(3))
+				Expect(metricFamilies[0].Metric[2].Gauge).ToNot(BeNil())
+				Expect(metricFamilies[0].Metric[2].Gauge.Value).To(Equal(&value))
 			})
 		})
 

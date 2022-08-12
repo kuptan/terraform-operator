@@ -39,7 +39,7 @@ func NewRecorder() RecorderInterface {
 				Name: "tfo_workflow_status",
 				Help: "The current status of a Terraform workflow/run resource reconciliation.",
 			},
-			[]string{"name", "namespace", "status"},
+			[]string{"name", "namespace"},
 		),
 		durationHistogram: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
@@ -70,11 +70,11 @@ func (r *Recorder) RecordTotal(name string, namespace string) {
 func (r *Recorder) RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus) {
 	var value float64
 
-	if status == v1alpha1.RunDeleted {
+	if status == v1alpha1.RunFailed {
 		value = 1
 	}
 
-	r.statusGauge.WithLabelValues(name, namespace, string(status)).Set(value)
+	r.statusGauge.WithLabelValues(name, namespace).Set(value)
 }
 
 // RecordDuration records the duration since start for the given ref.

@@ -33,6 +33,8 @@ spec:
   dependsOn:
     - name: terraform-run1
 
+  destroy: true
+
   variables:
     - key: length
       dependencyRef:
