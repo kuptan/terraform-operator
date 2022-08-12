@@ -10,4 +10,4 @@ spec:
     
   variables:
     - key: length
-      value: "4s"
+      value: "4"
