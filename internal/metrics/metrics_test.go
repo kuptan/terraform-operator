@@ -41,7 +41,7 @@ var _ = Describe("Metrics Recorder", func() {
 		})
 
 		Context("Recording Status", func() {
-			It("should record the status metric", func() {
+			It("should record the completed status", func() {
 				rec.RecordStatus(name, namespace, v1alpha1.RunCompleted)
 
 				var (
@@ -59,8 +59,8 @@ var _ = Describe("Metrics Recorder", func() {
 				Expect(metricFamilies[0].Metric[0].Gauge.Value).To(Equal(&value))
 			})
 
-			It("should record the deleted status", func() {
-				rec.RecordStatus(name, namespace, v1alpha1.RunDeleted)
+			It("should record the failed status", func() {
+				rec.RecordStatus(name+"failed", namespace, v1alpha1.RunFailed)
 
 				var (
 					value      float64 = 1.0

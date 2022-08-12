@@ -14,19 +14,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var (
-	dateFormat string = "2006-01-02 15:04:05"
-)
-
 func (r *TerraformReconciler) updateRunStatus(ctx context.Context, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
 	run.Status.RunStatus = status
 
-	if status != v1alpha1.RunStarted {
+	if status == v1alpha1.RunCompleted || status == v1alpha1.RunFailed {
+		run.Status.CompletionTime = time.Now().Format(time.UnixDate)
 		r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, status)
-	}
-
-	if status == v1alpha1.RunCompleted || status == v1alpha1.RunDestroyed {
-		run.Status.CompletionTime = time.Now().Format(dateFormat)
 	}
 
 	if err := r.Status().Update(ctx, run); err != nil {
@@ -38,7 +31,6 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 	dependencies, err := r.checkDependencies(ctx, *run)
 
 	run.Status.ObservedGeneration = run.Generation
-	run.Status.StartedTime = time.Now().Format(dateFormat)
 
 	if err != nil {
 		if !run.IsWaiting() {
@@ -72,6 +64,8 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 	}
 
 	run.Status.OutputSecretName = run.GetOutputSecretName()
+	run.Status.StartedTime = time.Now().Format(time.UnixDate)
+
 	r.updateRunStatus(ctx, run, v1alpha1.RunStarted)
 
 	return ctrl.Result{}, nil
@@ -105,17 +99,13 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 		return ctrl.Result{}, err
 	}
 
-	startTime, err := time.Parse(dateFormat, run.Status.StartedTime)
+	startTime, err := time.Parse(time.UnixDate, run.Status.StartedTime)
 
 	if err != nil {
-		r.Log.Error(err, "failed to parse status started at to time")
+		r.Log.Error(err, "failed to parse workflow start time")
 	}
 
-	defer r.MetricsRecorder.RecordDuration(
-		run.Name,
-		run.Namespace,
-		startTime,
-	)
+	defer r.MetricsRecorder.RecordDuration(run.Name, run.Namespace, startTime)
 
 	// job hasn't started
 	if job.Status.Active == 0 && job.Status.Succeeded == 0 && job.Status.Failed == 0 {
@@ -135,7 +125,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 
 	// job is successful
 	if job.Status.Succeeded > 0 {
-		r.Log.Info("terraform run job completed successfully, performing a cleanup on resources")
+		r.Log.Info("terraform run job completed successfully")
 
 		if run.Spec.DeleteCompletedJobs {
 			r.Log.Info("deleting completed job")
