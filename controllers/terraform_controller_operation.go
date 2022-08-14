@@ -17,8 +17,13 @@ import (
 func (r *TerraformReconciler) updateRunStatus(ctx context.Context, run *v1alpha1.Terraform, status v1alpha1.TerraformRunStatus) {
 	run.Status.RunStatus = status
 
+	// set completion time of the run only if status is completed/failed
 	if status == v1alpha1.RunCompleted || status == v1alpha1.RunFailed {
 		run.Status.CompletionTime = time.Now().Format(time.UnixDate)
+	}
+
+	// record the status only if completed/failed/waiting
+	if status == v1alpha1.RunCompleted || status == v1alpha1.RunFailed || status == v1alpha1.RunWaitingForDependency {
 		r.MetricsRecorder.RecordStatus(run.Name, run.Namespace, status)
 	}
 
