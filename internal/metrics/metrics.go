@@ -70,6 +70,10 @@ func (r *Recorder) RecordTotal(name string, namespace string) {
 func (r *Recorder) RecordStatus(name string, namespace string, status v1alpha1.TerraformRunStatus) {
 	var value float64
 
+	if status == v1alpha1.RunWaitingForDependency {
+		value = -1
+	}
+
 	if status == v1alpha1.RunFailed {
 		value = 1
 	}
