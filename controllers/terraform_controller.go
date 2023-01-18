@@ -103,14 +103,14 @@ func (r *TerraformReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			return ctrl.Result{}, err
 		}
 
+		r.Recorder.Event(run, "Normal", "Created", fmt.Sprintf("Run(%s) submitted", run.Status.RunID))
+		r.MetricsRecorder.RecordTotal(run.Name, run.Namespace)
+
 		if result.RequeueAfter > 0 {
 			r.Log.Info(fmt.Sprintf("%s, next run in %s", durationMsg, result.RequeueAfter.String()))
 
 			return result, nil
 		}
-
-		r.Recorder.Event(run, "Normal", "Created", fmt.Sprintf("Run(%s) submitted", run.Status.RunID))
-		r.MetricsRecorder.RecordTotal(run.Name, run.Namespace)
 
 		return result, nil
 	}
