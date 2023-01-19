@@ -30,7 +30,7 @@ func getConfigMapSpecForModule(name string, namespace string, module string, run
 }
 
 // createConfigMapForModule creates the ConfigMap for the Terraform workflow/run
-func createConfigMapForModule(namespacedName types.NamespacedName, run *Terraform) (*corev1.ConfigMap, error) {
+func createConfigMapForModule(ctx context.Context, namespacedName types.NamespacedName, run *Terraform) (*corev1.ConfigMap, error) {
 	configMaps := kube.ClientSet.CoreV1().ConfigMaps(namespacedName.Namespace)
 
 	tpl, err := getTerraformModuleFromTemplate(run)
@@ -45,7 +45,7 @@ func createConfigMapForModule(namespacedName types.NamespacedName, run *Terrafor
 		string(tpl), run.Status.RunID,
 		run.GetOwnerReference())
 
-	if _, err := configMaps.Create(context.TODO(), configMap, metav1.CreateOptions{}); err != nil {
+	if _, err := configMaps.Create(ctx, configMap, metav1.CreateOptions{}); err != nil {
 		return nil, err
 	}
 
@@ -53,14 +53,14 @@ func createConfigMapForModule(namespacedName types.NamespacedName, run *Terrafor
 }
 
 // deleteConfigMapByRun deletes the Kubernetes Job of the workflow/run
-func deleteConfigMapByRun(runName string, namespace string, runID string) error {
+func deleteConfigMapByRun(ctx context.Context, runName string, namespace string, runID string) error {
 	configMaps := kube.ClientSet.CoreV1().ConfigMaps(namespace)
 
 	resourceName := getUniqueResourceName(runName, runID)
 
 	deletePolicy := metav1.DeletePropagationForeground
 
-	if err := configMaps.Delete(context.Background(), resourceName, metav1.DeleteOptions{
+	if err := configMaps.Delete(ctx, resourceName, metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
 		return err

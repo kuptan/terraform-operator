@@ -11,8 +11,8 @@ import (
 )
 
 // isSecretExist checks whether a Secret exist
-func isSecretExist(name string, namespace string) (*corev1.Secret, error) {
-	secret, err := kube.ClientSet.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+func isSecretExist(ctx context.Context, name string, namespace string) (*corev1.Secret, error) {
+	secret, err := kube.ClientSet.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -26,10 +26,10 @@ func isSecretExist(name string, namespace string) (*corev1.Secret, error) {
 }
 
 // createSecretForOutputs creates a secret to store the the Terraform output of the workflow/run
-func createSecretForOutputs(namespacedName types.NamespacedName, t *Terraform) (*corev1.Secret, error) {
+func createSecretForOutputs(ctx context.Context, namespacedName types.NamespacedName, t *Terraform) (*corev1.Secret, error) {
 	secretName := getOutputSecretname(namespacedName.Name)
 
-	exist, err := isSecretExist(secretName, namespacedName.Namespace)
+	exist, err := isSecretExist(ctx, secretName, namespacedName.Namespace)
 
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func createSecretForOutputs(namespacedName types.NamespacedName, t *Terraform) (
 		Data: map[string][]byte{},
 	}
 
-	secret, err := secrets.Create(context.Background(), obj, metav1.CreateOptions{})
+	secret, err := secrets.Create(ctx, obj, metav1.CreateOptions{})
 
 	if err != nil {
 		return nil, err

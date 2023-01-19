@@ -225,12 +225,12 @@ func getJobSpecForRun(t *Terraform, owner metav1.OwnerReference) *batchv1.Job {
 }
 
 // getJobForRun returns the Kubernetes Job of a specific workflow/run
-func getJobForRun(runName string, namespace string, runID string) (*batchv1.Job, error) {
+func getJobForRun(ctx context.Context, runName string, namespace string, runID string) (*batchv1.Job, error) {
 	jobs := kube.ClientSet.BatchV1().Jobs(namespace)
 
 	name := getUniqueResourceName(runName, runID)
 
-	job, err := jobs.Get(context.Background(), name, metav1.GetOptions{})
+	job, err := jobs.Get(ctx, name, metav1.GetOptions{})
 
 	if err != nil {
 		return nil, err
@@ -240,14 +240,14 @@ func getJobForRun(runName string, namespace string, runID string) (*batchv1.Job,
 }
 
 // createJobForRun creates a Kubernetes Job to execute the workflow/run
-func createJobForRun(run *Terraform) (*batchv1.Job, error) {
+func createJobForRun(ctx context.Context, run *Terraform) (*batchv1.Job, error) {
 	jobs := kube.ClientSet.BatchV1().Jobs(run.Namespace)
 
 	ownerRef := run.GetOwnerReference()
 
 	job := getJobSpecForRun(run, ownerRef)
 
-	if _, err := jobs.Create(context.TODO(), job, metav1.CreateOptions{}); err != nil {
+	if _, err := jobs.Create(ctx, job, metav1.CreateOptions{}); err != nil {
 		return nil, err
 	}
 
@@ -255,14 +255,14 @@ func createJobForRun(run *Terraform) (*batchv1.Job, error) {
 }
 
 // deleteJobByRun deletes the Kubernetes Job of the workflow/run
-func deleteJobByRun(runName string, namespace string, runID string) error {
+func deleteJobByRun(ctx context.Context, runName string, namespace string, runID string) error {
 	jobs := kube.ClientSet.BatchV1().Jobs(namespace)
 
 	resourceName := getUniqueResourceName(runName, runID)
 
 	deletePolicy := metav1.DeletePropagationForeground
 
-	if err := jobs.Delete(context.Background(), resourceName, metav1.DeleteOptions{
+	if err := jobs.Delete(ctx, resourceName, metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
 		return err

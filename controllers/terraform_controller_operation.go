@@ -54,7 +54,7 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 
 	setVariablesFromDependencies(run, dependencies)
 
-	_, err = run.CreateTerraformRun(namespacedName)
+	_, err = run.CreateTerraformRun(ctx, namespacedName)
 
 	if err != nil {
 		r.Log.Error(err, "failed create a terraform run")
@@ -64,7 +64,7 @@ func (r *TerraformReconciler) handleRunCreate(ctx context.Context, run *v1alpha1
 		return ctrl.Result{}, err
 	}
 
-	if err = run.CleanupResources(); err != nil {
+	if err = run.CleanupResources(ctx); err != nil {
 		r.Log.Error(err, "failed to cleanup resources")
 	}
 
@@ -96,7 +96,7 @@ func (r *TerraformReconciler) handleRunDelete(ctx context.Context, run *v1alpha1
 }
 
 func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alpha1.Terraform) (ctrl.Result, error) {
-	job, err := run.GetJobByRun()
+	job, err := run.GetJobByRun(ctx)
 
 	r.Log.Info("waiting for terraform job run to complete", "name", job.Name)
 
@@ -135,7 +135,7 @@ func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alph
 		if run.Spec.DeleteCompletedJobs {
 			r.Log.Info("deleting completed job")
 
-			if err := run.DeleteAfterCompletion(); err != nil {
+			if err := run.DeleteAfterCompletion(ctx); err != nil {
 				r.Log.Error(err, "failed to delete terraform run job after completion", "name", job.Name)
 			} else {
 				r.Recorder.Event(run, "Normal", "Cleanup", fmt.Sprintf("Run(%s) kubernetes job was deleted", run.Status.RunID))
