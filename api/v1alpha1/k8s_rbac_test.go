@@ -25,7 +25,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 	Context("RBAC", func() {
 
 		It("service account should not be found", func() {
-			found, err := isServiceAccountExist(rbacName, namespace)
+			found, err := isServiceAccountExist(context.Background(), rbacName, namespace)
 
 			Expect(err).ToNot(HaveOccurred())
 			Expect(found).To(BeFalse())
@@ -39,7 +39,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 		})
 
 		It("should create service account and role binding", func() {
-			err := createRbacConfigIfNotExist(rbacName, namespace)
+			err := createRbacConfigIfNotExist(context.Background(), rbacName, namespace)
 			Expect(err).ToNot(HaveOccurred())
 
 			sa, err := kube.ClientSet.CoreV1().ServiceAccounts(namespace).Get(context.Background(), rbacName, metav1.GetOptions{})

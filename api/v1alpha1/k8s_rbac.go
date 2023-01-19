@@ -59,8 +59,8 @@ func createRoleBinding(name string, namespace string) (*rbacv1.RoleBinding, erro
 }
 
 // isServiceAccountExist checks whether the ServiceAccount for the Terraform Runner exist
-func isServiceAccountExist(name string, namespace string) (bool, error) {
-	_, err := kube.ClientSet.CoreV1().ServiceAccounts(namespace).Get(context.Background(), name, metav1.GetOptions{})
+func isServiceAccountExist(ctx context.Context, name string, namespace string) (bool, error) {
+	_, err := kube.ClientSet.CoreV1().ServiceAccounts(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -89,8 +89,8 @@ func isRoleBindingExist(name string, namespace string) (bool, error) {
 }
 
 // createRbacConfigIfNotExist validates if RBAC exist for the Terraform Runner and creates it if not exist
-func createRbacConfigIfNotExist(name string, namespace string) error {
-	saExist, err := isServiceAccountExist(name, namespace)
+func createRbacConfigIfNotExist(ctx context.Context, name string, namespace string) error {
+	saExist, err := isServiceAccountExist(ctx, name, namespace)
 
 	if err != nil {
 		return err

@@ -156,16 +156,16 @@ var _ = Describe("Terraform", func() {
 		It("should handle a terraform run job", func() {
 			run.Status.RunID = "1234"
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 			Expect(err).ToNot(HaveOccurred(), "failed to create a terraform run")
 			Expect(job.Name).ToNot(BeEmpty())
 
-			job, err = run.GetJobByRun()
+			job, err = run.GetJobByRun(context.Background())
 
 			Expect(err).ToNot(HaveOccurred(), "run job was not found")
 			Expect(job.Name).ToNot(BeEmpty())
 
-			err = run.DeleteAfterCompletion()
+			err = run.DeleteAfterCompletion(context.Background())
 
 			Expect(err).ToNot(HaveOccurred(), "failed to clean up resources")
 		})
@@ -184,7 +184,7 @@ var _ = Describe("Terraform", func() {
 				},
 			}
 
-			Expect(run.CleanupResources()).ToNot(HaveOccurred())
+			Expect(run.CleanupResources(context.Background())).ToNot(HaveOccurred())
 		})
 
 		It("should handle resource cleanup when previous run exist", func() {
@@ -195,7 +195,7 @@ var _ = Describe("Terraform", func() {
 				},
 			}
 
-			Expect(run.CleanupResources()).ToNot(HaveOccurred())
+			Expect(run.CleanupResources(context.Background())).ToNot(HaveOccurred())
 		})
 
 		It("should create a job when RBAC objects already exist", func() {
@@ -229,10 +229,10 @@ var _ = Describe("Terraform", func() {
 				},
 			}
 
-			err := createRbacConfigIfNotExist(runnerRBACName, key.Namespace)
+			err := createRbacConfigIfNotExist(context.Background(), runnerRBACName, key.Namespace)
 			Expect(err).ToNot(HaveOccurred())
 
-			job, err := run2.CreateTerraformRun(key)
+			job, err := run2.CreateTerraformRun(context.Background(), key)
 			Expect(err).ToNot(HaveOccurred(), "failed to create a terraform run")
 			Expect(job.Name).ToNot(BeEmpty())
 		})
@@ -282,7 +282,7 @@ var _ = Describe("Terraform", func() {
 
 			kube.ClientSet.CoreV1().ConfigMaps("default").Create(context.Background(), &cfg, metav1.CreateOptions{})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -313,7 +313,7 @@ var _ = Describe("Terraform", func() {
 
 			kube.ClientSet.BatchV1().Jobs("default").Create(context.Background(), &j, metav1.CreateOptions{})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -322,14 +322,14 @@ var _ = Describe("Terraform", func() {
 		})
 
 		It("should return error if the job does not exist", func() {
-			job, err := run.GetJobByRun()
+			job, err := run.GetJobByRun(context.Background())
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
 		})
 
 		It("should fail to delete a job that does not exist", func() {
-			err := run.DeleteAfterCompletion()
+			err := run.DeleteAfterCompletion(context.Background())
 
 			Expect(err).To(HaveOccurred())
 		})
@@ -339,7 +339,7 @@ var _ = Describe("Terraform", func() {
 				return true, &corev1.ServiceAccount{}, errors.New("Error creating service account")
 			})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -350,7 +350,7 @@ var _ = Describe("Terraform", func() {
 				return true, &corev1.ServiceAccount{}, errors.New("Error getting service account")
 			})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -361,7 +361,7 @@ var _ = Describe("Terraform", func() {
 				return true, &rbacv1.RoleBinding{}, errors.New("Error creating role binding")
 			})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -372,7 +372,7 @@ var _ = Describe("Terraform", func() {
 				return true, &rbacv1.RoleBinding{}, errors.New("Error getting role binding")
 			})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -383,7 +383,7 @@ var _ = Describe("Terraform", func() {
 				return true, &corev1.Secret{}, errors.New("Error creating secret")
 			})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -394,7 +394,7 @@ var _ = Describe("Terraform", func() {
 				return true, &corev1.Secret{}, errors.New("Error getting secret")
 			})
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).To(HaveOccurred())
 			Expect(job).To(BeNil())
@@ -408,12 +408,12 @@ var _ = Describe("Terraform", func() {
 			run.Status.RunID = "1234"
 			run.Status.PreviousRunID = "jawd12"
 
-			job, err := run.CreateTerraformRun(key)
+			job, err := run.CreateTerraformRun(context.Background(), key)
 
 			Expect(err).ToNot(HaveOccurred())
 			Expect(job).ToNot(BeNil())
 
-			err = run.CleanupResources()
+			err = run.CleanupResources(context.Background())
 			Expect(err).To(HaveOccurred())
 		})
 
@@ -422,7 +422,7 @@ var _ = Describe("Terraform", func() {
 				return true, &corev1.ConfigMap{}, errors.New("Error deleting config map")
 			})
 
-			err := run.CleanupResources()
+			err := run.CleanupResources(context.Background())
 			Expect(err).To(HaveOccurred())
 		})
 	})

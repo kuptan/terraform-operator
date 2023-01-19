@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 
 	batchv1 "k8s.io/api/batch/v1"
@@ -283,10 +284,10 @@ const runnerRBACName string = "terraform-runner"
 // (RBAC (service account & Role), ConfigMap for the terraform module file,
 // Secret to store the outputs if any, will be empty if no outputs are defined,
 // Job to execute the workflow/run)
-func (t *Terraform) CreateTerraformRun(namespacedName types.NamespacedName) (*batchv1.Job, error) {
+func (t *Terraform) CreateTerraformRun(ctx context.Context, namespacedName types.NamespacedName) (*batchv1.Job, error) {
 	setBackendCfgIfNotExist(t)
 
-	if err := createRbacConfigIfNotExist(runnerRBACName, namespacedName.Namespace); err != nil {
+	if err := createRbacConfigIfNotExist(ctx, runnerRBACName, namespacedName.Namespace); err != nil {
 		return nil, err
 	}
 
@@ -326,7 +327,7 @@ func (t *Terraform) GetOutputSecretName() string {
 }
 
 // CleanupResources cleans up old resources (secrets & configmaps)
-func (t *Terraform) CleanupResources() error {
+func (t *Terraform) CleanupResources(ctx context.Context) error {
 	previousRunID := t.Status.PreviousRunID
 
 	if previousRunID == "" {
@@ -334,7 +335,7 @@ func (t *Terraform) CleanupResources() error {
 	}
 
 	// delete the older job
-	if err := deleteJobByRun(t.Name, t.Namespace, previousRunID); err != nil {
+	if err := deleteJobByRun(ctx, t.Name, t.Namespace, previousRunID); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
