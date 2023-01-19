@@ -313,8 +313,8 @@ func (t *Terraform) CreateTerraformRun(ctx context.Context, namespacedName types
 }
 
 // DeleteAfterCompletion removes the Kubernetes of the workflow/run once completed
-func (t *Terraform) DeleteAfterCompletion() error {
-	if err := deleteJobByRun(t.Name, t.Namespace, t.Status.RunID); err != nil {
+func (t *Terraform) DeleteAfterCompletion(ctx context.Context) error {
+	if err := deleteJobByRun(ctx, t.Name, t.Namespace, t.Status.RunID); err != nil {
 		return err
 	}
 
@@ -352,8 +352,8 @@ func (t *Terraform) CleanupResources(ctx context.Context) error {
 }
 
 // GetJobByRun returns the Kubernetes job of the workflow/run
-func (t *Terraform) GetJobByRun() (*batchv1.Job, error) {
-	job, err := getJobForRun(t.Name, t.Namespace, t.Status.RunID)
+func (t *Terraform) GetJobByRun(ctx context.Context) (*batchv1.Job, error) {
+	job, err := getJobForRun(ctx, t.Name, t.Namespace, t.Status.RunID)
 
 	if err != nil {
 		return nil, err

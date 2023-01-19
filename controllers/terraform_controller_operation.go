@@ -96,7 +96,7 @@ func (r *TerraformReconciler) handleRunDelete(ctx context.Context, run *v1alpha1
 }
 
 func (r *TerraformReconciler) handleRunJobWatch(ctx context.Context, run *v1alpha1.Terraform) (ctrl.Result, error) {
-	job, err := run.GetJobByRun()
+	job, err := run.GetJobByRun(ctx)
 
 	r.Log.Info("waiting for terraform job run to complete", "name", job.Name)
 
