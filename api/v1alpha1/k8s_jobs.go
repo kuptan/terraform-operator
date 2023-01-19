@@ -240,14 +240,14 @@ func getJobForRun(ctx context.Context, runName string, namespace string, runID s
 }
 
 // createJobForRun creates a Kubernetes Job to execute the workflow/run
-func createJobForRun(run *Terraform) (*batchv1.Job, error) {
+func createJobForRun(ctx context.Context, run *Terraform) (*batchv1.Job, error) {
 	jobs := kube.ClientSet.BatchV1().Jobs(run.Namespace)
 
 	ownerRef := run.GetOwnerReference()
 
 	job := getJobSpecForRun(run, ownerRef)
 
-	if _, err := jobs.Create(context.TODO(), job, metav1.CreateOptions{}); err != nil {
+	if _, err := jobs.Create(ctx, job, metav1.CreateOptions{}); err != nil {
 		return nil, err
 	}
 

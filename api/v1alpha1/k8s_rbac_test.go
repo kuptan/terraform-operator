@@ -32,7 +32,7 @@ var _ = Describe("Kubernetes RBAC", func() {
 		})
 
 		It("role binding should not be found", func() {
-			found, err := isRoleBindingExist(rbacName, namespace)
+			found, err := isRoleBindingExist(context.Background(), rbacName, namespace)
 
 			Expect(err).ToNot(HaveOccurred())
 			Expect(found).To(BeFalse())

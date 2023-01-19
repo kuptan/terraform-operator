@@ -291,19 +291,19 @@ func (t *Terraform) CreateTerraformRun(ctx context.Context, namespacedName types
 		return nil, err
 	}
 
-	_, err := createConfigMapForModule(namespacedName, t)
+	_, err := createConfigMapForModule(ctx, namespacedName, t)
 
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = createSecretForOutputs(namespacedName, t)
+	_, err = createSecretForOutputs(ctx, namespacedName, t)
 
 	if err != nil {
 		return nil, err
 	}
 
-	job, err := createJobForRun(t)
+	job, err := createJobForRun(ctx, t)
 
 	if err != nil {
 		return nil, err
@@ -342,7 +342,7 @@ func (t *Terraform) CleanupResources(ctx context.Context) error {
 	}
 
 	// delete the older configmap that holds the module
-	if err := deleteConfigMapByRun(t.Name, t.Namespace, previousRunID); err != nil {
+	if err := deleteConfigMapByRun(ctx, t.Name, t.Namespace, previousRunID); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
