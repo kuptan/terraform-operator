@@ -27,6 +27,11 @@ The Terraform Operator provides support to run Terraform modules in Kubernetes i
 
 This project makes running a Terraform module, Kubernetes native through a single Kubernetes [CRD](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/). You can run the manifest with kubectl, Terraform, GitOps tools, etc...
 
+> **Warning**
+>
+> The Terraform Operator is an experimental project at this stage
+
+
 **Disclaimer**
 
 This project is not a YAML to HCL converter. It just provides a way to run Terraform commands through a Kubernetes CRD. To see how this controller works, have a look at the [design doc](https://kuptan.github.io/terraform-operator/design/)
